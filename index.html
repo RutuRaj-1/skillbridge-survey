@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillBridge | Athlete & Gamers Experience Survey</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Progress Bar -->
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="progress-text">
+                <span class="progress-percent">0%</span>
+                <span class="progress-message">Starting your journey...</span>
+            </div>
+        </div>
+
+        <!-- Survey Content -->
+        <div class="survey-container">
+            <!-- Welcome Screen -->
+            <div class="screen active" id="welcome-screen">
+                <div class="welcome-content">
+                    <div class="logo">
+                        <span class="logo-icon">🏆</span>
+                        <h1 class="logo-text">SkillBridge</h1>
+                    </div>
+                    <h2 class="welcome-title">Shape the Future of Sports And Esports</h2>
+                    <p class="welcome-subtitle">Help us build a better platform for athletes and gamers. Share your journey through this immersive, premium experience.</p>
+                    <button class="btn-primary start-survey-btn">
+                        Begin Experience
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                    <div class="welcome-features">
+                        <div class="feature">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>100% Anonymous</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-bolt"></i>
+                            <span>3-5 Minutes</span>
+                        </div>
+                        <div class="feature">
+                            <i class="fas fa-trophy"></i>
+                            <span>Premium & Immersive Experience</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Screens -->
+            <div class="screen" id="question-container">
+                <div class="question-header">
+                    <h2 class="question-title"></h2>
+                    <p class="question-subtitle"></p>
+                </div>
+                
+                <div class="options-container">
+                    <!-- Options will be dynamically inserted here -->
+                </div>
+                
+                <div class="input-container">
+                    <!-- Text input will be dynamically inserted here -->
+                </div>
+                
+                <div class="navigation">
+                    <button class="btn-secondary" id="back-btn">
+                        <i class="fas fa-arrow-left"></i>
+                        Back
+                    </button>
+                    <button class="btn-primary" id="next-btn" disabled>
+                        Continue
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Thank You Screen -->
+            <div class="screen" id="thank-you-screen">
+                <div class="thank-you-content">
+                    <div class="celebration-animation">
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                        <div class="confetti"></div>
+                    </div>
+                    <div class="logo">
+                        <span class="logo-icon">🏆</span>
+                        <h1 class="logo-text">SkillBridge</h1>
+                    </div>
+                    <h2 class="thank-you-title">Journey Complete!</h2>
+                    <div class="completion-stats">
+                        <div class="completion-circle">
+                            <svg class="progress-ring" width="120" height="120">
+                                <circle class="progress-ring-circle" stroke="#6d28d9" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                            </svg>
+                            <span class="completion-percent">100%</span>
+                        </div>
+                        <p class="completion-message">Your insights will help shape the future for Sport athletes & Esports Gamers in India  </p>
+                    </div>
+                    <div class="thank-you-message">
+                        <p>Thank you for sharing your experience with us. Your journey matters, and your feedback will directly influence how we build SkillBridge to better serve athletes and gamers like you.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Elements -->
+        <div class="background-animation">
+            <div class="gradient-circle circle-1"></div>
+            <div class="gradient-circle circle-2"></div>
+            <div class="gradient-circle circle-3"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
