@@ -300,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         'esports-1': { id: 'esports-1', title: 'Biggest problem in your esports journey?', type: 'text-long', next: 'esports-2' },
         'esports-2': { 
             id: 'esports-2', 
-            title: 'Felt stuck in improvement?', 
+            title: 'Have you felt stuck in your improvement?', 
             type: 'single',
             options: [
                 { text: 'Yes', value: 'yes' },
@@ -309,10 +309,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             next: 'esports-2a'
         },
         'esports-2a': { id: 'esports-2a', title: 'Reason?', type: 'text-short', next: 'esports-3' },
-        'esports-3': { id: 'esports-3', title: 'If you go pro today, what steps next? confusion?', type: 'text-long', next: 'esports-4' },
+        'esports-3': { id: 'esports-3', title: 'If you were to pursue esports professionally, what would you do first? What questions or uncertainties would you have?', type: 'text-long', next: 'esports-4' },
         'esports-4': { 
             id: 'esports-4', 
-            title: 'Enough real opportunities?', 
+            title: 'Are there enough real opportunities in your Game?', 
             type: 'single',
             options: [
                 { text: 'Yes', value: 'yes' },
@@ -325,7 +325,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         'esports-5': { id: 'esports-5', title: 'How do you judge coach/team/course trust?', type: 'text-long', next: 'esports-6' },
         'esports-6': { 
             id: 'esports-6', 
-            title: 'Played tournaments?', 
+            title: 'Have you played tournaments?', 
             type: 'single',
             options: [
                 { text: 'Yes', value: 'yes' },
@@ -367,7 +367,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
         'esports-11': { 
             id: 'esports-11', 
-            title: 'Would you pay?', 
+            title: 'Would you like to pay for such platforms?', 
             type: 'single',
             options: [
                 { text: 'Yes', value: 'yes' },
@@ -393,7 +393,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
         'esports-14': { 
             id: 'esports-14', 
-            title: 'Serious playing duration', 
+            title: 'What is your serious playing duration?', 
             type: 'single',
             options: [
                 { text: '< 6 months', value: '<6' },
@@ -406,7 +406,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
         'esports-15': { 
             id: 'esports-15', 
-            title: 'Weekly time', 
+            title: 'Weekly time spent on gaming?', 
             type: 'single',
             options: [
                 { text: '< 10 hours', value: '<10' },
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
         'esports-16': { 
             id: 'esports-16', 
-            title: 'Family support', 
+            title: 'What is your family support level?', 
             type: 'single',
             options: [
                 { text: 'Strong', value: 'strong' },
@@ -432,7 +432,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         'esports-17': { id: 'esports-17', title: 'City', type: 'text-short', next: 'esports-18' },
         'esports-18': { 
             id: 'esports-18', 
-            title: 'Age group', 
+            title: 'What is your age group?', 
             type: 'single',
             options: [
                 { text: 'Under 18', value: 'under-18' },
@@ -445,7 +445,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         },
         'esports-19': { 
             id: 'esports-19', 
-            title: 'Gender', 
+            title: 'What is your gender?', 
             type: 'single',
             options: [
                 { text: 'Male', value: 'male' },
