@@ -702,9 +702,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Restore answer if exists
         if (state.answers[questionId]) restoreAnswer(question, questionId);
         
-        // Add counter
-        addQuestionCounter();
-        
         // Animate
         elements.questionContainer.style.opacity = '0';
         requestAnimationFrame(() => {
@@ -847,28 +844,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
-    function addQuestionCounter() {
-        const existing = document.querySelector('.question-counter');
-        if (existing) existing.remove();
-        
-        let totalInPath = 0;
-        if (state.currentPath === 'Sports') totalInPath = 19;
-        else if (state.currentPath === 'E-Sports') totalInPath = 21;
-        else if (state.currentPath === 'Non-Player') totalInPath = 1;
-        else totalInPath = 1;
-        
-        const counter = document.createElement('div');
-        counter.className = 'question-counter';
-        counter.innerHTML = `
-            <span class="current">${state.currentQuestionNumber}</span>
-            <span>/</span>
-            <span class="total">${totalInPath}</span>
-            <span>questions</span>
-        `;
-        
-        elements.questionTitle.parentNode.appendChild(counter);
-    }
-
     async function goToNextQuestion() {
         const question = surveyData[state.currentQuestionId];
         if (!question) return;
@@ -926,16 +901,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         const message = messages[state.currentPath] || "Thank you for your feedback!";
         document.querySelector('.completion-message').textContent = message;
         
-        // Save to Firebase
-        const savedId = await saveSurveyToFirebase();
-        
-        // Add reference ID
-        if (savedId) {
-            const idEl = document.createElement('div');
-            idEl.className = 'survey-id';
-            idEl.innerHTML = `<small>Reference: ${savedId.substring(0, 8)}</small>`;
-            document.querySelector('.thank-you-message').appendChild(idEl);
-        }
+        // Save to Firebase (without showing reference ID)
+        await saveSurveyToFirebase();
         
         // Celebrate
         triggerConfetti();
@@ -953,9 +920,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         let totalInPath = 1;
         let completed = state.questionHistory.length - 1;
         
-        if (state.currentPath === 'Sports') totalInPath = 19;
-        else if (state.currentPath === 'E-Sports') totalInPath = 21;
-        else if (state.currentPath === 'Non-Player') totalInPath = 1;
+        if (state.currentPath === 'Sports') totalInPath = 20;
+        else if (state.currentPath === 'E-Sports') totalInPath = 24;
+        else if (state.currentPath === 'Non-Player') totalInPath = 2;
         
         if (state.currentQuestionId === 'initial' || state.currentQuestionId === 'player-type') {
             totalInPath = 3;
