@@ -283,18 +283,22 @@ document.addEventListener('DOMContentLoaded', async function() {
             next: 'combined-10' 
         },
         
-        // Sports-specific questions for combined path
+        // TEXT INPUT QUESTIONS - Combined Path
         'combined-10': { 
             id: 'combined-10', 
             title: 'Primary Sport', 
-            type: 'text',
+            subtitle: 'Please specify your main sport',
+            type: 'text-short',
+            placeholder: 'e.g., Cricket, Football, Basketball...',
             next: 'combined-11' 
         },
         
         'combined-11': { 
             id: 'combined-11', 
             title: 'Primary E-Sport / Game', 
-            type: 'text',
+            subtitle: 'Please specify your main game',
+            type: 'text-short',
+            placeholder: 'e.g., Valorant, League of Legends, CS:GO...',
             next: 'combined-12' 
         },
         
@@ -358,7 +362,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         'combined-16': { 
             id: 'combined-16', 
             title: 'City', 
-            type: 'text',
+            subtitle: 'Where are you currently based?',
+            type: 'text-short',
+            placeholder: 'e.g., Mumbai, Delhi, Bangalore...',
             next: 'combined-17' 
         },
         
@@ -460,6 +466,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'sports-1', 
             title: 'What is your biggest struggle(s) right now?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Cost/financial', value: 'financial' },
                 { text: 'Finding good coaching', value: 'coaching' },
@@ -477,6 +484,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'sports-2', 
             title: 'What stops you from taking steps toward pro sports?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Don\'t know the path/roadmap', value: 'dont-know-path' },
                 { text: 'Don\'t know right academies', value: 'dont-know-academies' },
@@ -523,6 +531,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'sports-4a', 
             title: 'Why do you feel this way about opportunities?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Limited in my city/region', value: 'location' },
                 { text: 'Only for elite players', value: 'elite-only' },
@@ -551,6 +560,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'sports-6', 
             title: 'What matters most when choosing a coach/academy?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Student results/alumni', value: 'results' },
                 { text: 'Online reviews/ratings', value: 'reviews' },
@@ -567,6 +577,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'sports-7', 
             title: 'What frustrates you most in sports ecosystem?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'High costs', value: 'high-cost' },
                 { text: 'Unclear career paths', value: 'unclear-paths' },
@@ -584,6 +595,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'sports-8', 
             title: 'What would give you confidence to choose sports full-time?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Guaranteed minimum income', value: 'income' },
                 { text: 'Professional contract offer', value: 'contract' },
@@ -654,7 +666,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         'sports-13': { 
             id: 'sports-13', 
             title: 'Primary Sport(s)', 
-            type: 'text',
+            subtitle: 'List the sports you actively play',
+            type: 'text-long',
+            placeholder: 'e.g., Cricket, Football, Basketball...',
             next: 'sports-14' 
         },
         
@@ -717,7 +731,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         'sports-18': { 
             id: 'sports-18', 
             title: 'City', 
-            type: 'text',
+            subtitle: 'Where are you currently based?',
+            type: 'text-short',
+            placeholder: 'e.g., Mumbai, Delhi, Bangalore...',
             next: 'sports-19' 
         },
         
@@ -741,7 +757,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             subtitle: 'Select all that apply',
             type: 'multi',
             options: [
-                { text: 'Hitting high rank ', value: 'plateau' },
+                { text: 'Hitting high rank', value: 'plateau' },
                 { text: 'No proper coaching', value: 'coaching' },
                 { text: 'Time vs practice', value: 'time' },
                 { text: 'Finding teammates', value: 'teammates' },
@@ -814,6 +830,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'esports-4a', 
             title: 'Why do you feel this way?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Small player base', value: 'small-community' },
                 { text: 'Region not supported', value: 'region' },
@@ -830,6 +847,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'esports-5', 
             title: 'How do you verify if coaching is legit?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Student results/rank', value: 'results' },
                 { text: 'Free YouTube content', value: 'free-content' },
@@ -888,6 +906,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'esports-8', 
             title: 'What\'s missing in current learning resources?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Structured pathway', value: 'structure' },
                 { text: 'Personalized feedback', value: 'feedback' },
@@ -904,6 +923,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             id: 'esports-9', 
             title: 'What would make you go full-time in esports?', 
             subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Salary/contract offer', value: 'salary' },
                 { text: 'Consistent winnings', value: 'winnings' },
@@ -947,8 +967,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         'esports-12': { 
             id: 'esports-12', 
             title: 'Primary Game(s)', 
-            subtitle:'List all the Games you have played and are currently Playing',
-            type: 'text',
+            subtitle: 'List all the games you have played and are currently playing',
+            type: 'text-long',
+            placeholder: 'e.g., Valorant, League of Legends, CS:GO, Dota 2...',
             next: 'esports-13' 
         },
         
@@ -1011,7 +1032,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         'esports-17': { 
             id: 'esports-17', 
             title: 'City', 
-            type: 'text',
+            subtitle: 'Where are you currently based?',
+            type: 'text-short',
+            placeholder: 'e.g., Mumbai, Delhi, Bangalore...',
             next: 'esports-18' 
         },
         
@@ -1101,7 +1124,14 @@ document.addEventListener('DOMContentLoaded', async function() {
         optionsContainer: document.querySelector('.options-container'),
         inputContainer: document.querySelector('.input-container'),
         completionPercent: document.querySelector('.completion-percent'),
-        progressRingCircle: document.querySelector('.progress-ring-circle')
+        progressRingCircle: document.querySelector('.progress-ring-circle'),
+        pathIndicator: document.getElementById('path-indicator'),
+        pathName: document.getElementById('path-name'),
+        questionCounter: document.getElementById('question-counter'),
+        currentQuestion: document.getElementById('current-question'),
+        totalQuestions: document.getElementById('total-questions'),
+        submissionStatus: document.getElementById('submission-status'),
+        offlineIndicator: document.getElementById('offline-indicator')
     };
 
     // ==================== UTILITY FUNCTIONS ====================
@@ -1126,7 +1156,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!firebaseService) return null;
         
         try {
-            showSubmissionStatus('Saving responses...', 'loading');
+            showSubmissionStatus('Saving your responses...', 'loading');
             
             const surveyData = {
                 sessionId: state.surveySessionId,
@@ -1134,7 +1164,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                 startedAt: state.userStartedAt,
                 completedAt: new Date(),
                 duration: Date.now() - state.userStartedAt.getTime(),
-                totalQuestions: state.totalQuestions,
+                totalQuestions: getTotalQuestionsForPath(),
                 completedQuestions: Object.keys(state.answers).length,
                 answers: formatAnswersForStorage(state.answers),
                 metadata: {
@@ -1151,18 +1181,27 @@ document.addEventListener('DOMContentLoaded', async function() {
             
             if (result.success) {
                 await firebaseService.updateAnalytics(state.currentPath);
-                showSubmissionStatus('Responses saved successfully!', 'success');
+                showSubmissionStatus('Your journey has been saved! Thank you!', 'success');
                 return result.id;
             } else {
-                showSubmissionStatus('Saved locally (will sync later)', 'info');
+                showSubmissionStatus('Saved locally - will sync when online', 'info');
                 saveToLocalStorage(surveyData);
                 return 'local_' + state.surveySessionId;
             }
         } catch (error) {
             console.error('Save error:', error);
             showSubmissionStatus('Saved locally for later sync', 'info');
+            saveToLocalStorage(surveyData);
             return 'local_' + state.surveySessionId;
         }
+    }
+
+    function getTotalQuestionsForPath() {
+        if (state.currentPath === 'Sports') return 19;
+        else if (state.currentPath === 'E-Sports') return 21;
+        else if (state.currentPath === 'Combined') return 23;
+        else if (state.currentPath === 'Non-Player') return 2;
+        return 1;
     }
 
     function formatAnswersForStorage(answers) {
@@ -1178,38 +1217,38 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function saveToLocalStorage(surveyData) {
-        const pending = JSON.parse(localStorage.getItem('pending_surveys') || '[]');
-        pending.push({
-            ...surveyData,
-            localId: 'local_' + state.surveySessionId,
-            savedAt: new Date().toISOString()
-        });
-        localStorage.setItem('pending_surveys', JSON.stringify(pending.slice(-10)));
+        try {
+            const pending = JSON.parse(localStorage.getItem('pending_surveys') || '[]');
+            pending.push({
+                ...surveyData,
+                localId: 'local_' + state.surveySessionId,
+                savedAt: new Date().toISOString()
+            });
+            localStorage.setItem('pending_surveys', JSON.stringify(pending.slice(-10)));
+        } catch (e) {
+            console.error('Failed to save to localStorage:', e);
+        }
     }
 
     function showSubmissionStatus(message, type) {
-        let statusEl = document.querySelector('.submission-status');
-        if (!statusEl) {
-            statusEl = document.createElement('div');
-            statusEl.className = 'submission-status';
-            if (elements.thankYouScreen.querySelector('.thank-you-content')) {
-                elements.thankYouScreen.querySelector('.thank-you-content').appendChild(statusEl);
-            }
-        }
+        if (!elements.submissionStatus) return;
         
-        if (statusEl) {
-            statusEl.textContent = message;
-            statusEl.className = `submission-status ${type}`;
-            statusEl.style.display = 'block';
-            
-            if (type === 'success') {
-                setTimeout(() => statusEl.style.display = 'none', 3000);
-            }
+        elements.submissionStatus.textContent = message;
+        elements.submissionStatus.className = `submission-status ${type}`;
+        elements.submissionStatus.style.display = 'block';
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                if (elements.submissionStatus) {
+                    elements.submissionStatus.style.display = 'none';
+                }
+            }, 4000);
         }
     }
 
     // ==================== SURVEY LOGIC ====================
     function init() {
+        // Add event listeners
         if (elements.startSurveyBtn) {
             elements.startSurveyBtn.addEventListener('click', startSurvey);
         }
@@ -1223,13 +1262,30 @@ document.addEventListener('DOMContentLoaded', async function() {
             elements.restartBtn.addEventListener('click', restartSurvey);
         }
         
+        // Keyboard navigation
         document.addEventListener('keydown', handleKeyboardNavigation);
         
+        // Online/offline detection
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        // Initialize
         addStatusStyles();
         updateProgress();
         createConfetti();
+        updateOnlineStatus();
         
         console.log('Survey initialized with session:', state.surveySessionId);
+    }
+
+    function updateOnlineStatus() {
+        if (elements.offlineIndicator) {
+            if (navigator.onLine) {
+                elements.offlineIndicator.style.display = 'none';
+            } else {
+                elements.offlineIndicator.style.display = 'flex';
+            }
+        }
     }
 
     function addStatusStyles() {
@@ -1238,33 +1294,47 @@ document.addEventListener('DOMContentLoaded', async function() {
             style.id = 'status-styles';
             style.textContent = `
                 .submission-status {
-                    padding: 12px 20px;
+                    padding: 15px 25px;
                     border-radius: 12px;
                     margin: 20px 0;
                     font-weight: 600;
                     text-align: center;
                     display: none;
                     animation: fadeIn 0.3s ease-out;
+                    backdrop-filter: blur(10px);
                 }
                 .submission-status.loading {
-                    background: rgba(59, 130, 246, 0.1);
+                    background: rgba(59, 130, 246, 0.15);
                     color: #3b82f6;
-                    border: 1px solid rgba(59, 130, 246, 0.2);
+                    border: 1px solid rgba(59, 130, 246, 0.3);
                 }
                 .submission-status.success {
-                    background: rgba(34, 197, 94, 0.1);
+                    background: rgba(34, 197, 94, 0.15);
                     color: #16a34a;
-                    border: 1px solid rgba(34, 197, 94, 0.2);
+                    border: 1px solid rgba(34, 197, 94, 0.3);
                 }
                 .submission-status.info {
-                    background: rgba(251, 191, 36, 0.1);
+                    background: rgba(251, 191, 36, 0.15);
                     color: #d97706;
-                    border: 1px solid rgba(251, 191, 36, 0.2);
+                    border: 1px solid rgba(251, 191, 36, 0.3);
                 }
                 .submission-status.error {
-                    background: rgba(239, 68, 68, 0.1);
+                    background: rgba(239, 68, 68, 0.15);
                     color: #dc2626;
-                    border: 1px solid rgba(239, 68, 68, 0.2);
+                    border: 1px solid rgba(239, 68, 68, 0.3);
+                }
+                .offline-indicator {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 10px 20px;
+                    background: rgba(255, 193, 7, 0.1);
+                    color: #ffc107;
+                    border-radius: 50px;
+                    margin-top: 20px;
+                    border: 1px solid rgba(255, 193, 7, 0.3);
+                    backdrop-filter: blur(10px);
+                    font-size: 14px;
                 }
             `;
             document.head.appendChild(style);
@@ -1288,11 +1358,23 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!question) return;
         
         state.currentQuestionId = questionId;
-        state.currentQuestionNumber++;
+        state.currentQuestionNumber = state.questionHistory.length;
+        
+        // Update path indicator
+        updatePathIndicator();
+        
+        // Update question counter
+        updateQuestionCounter();
         
         // Clear containers
-        if (elements.optionsContainer) elements.optionsContainer.innerHTML = '';
-        if (elements.inputContainer) elements.inputContainer.innerHTML = '';
+        if (elements.optionsContainer) {
+            elements.optionsContainer.innerHTML = '';
+            elements.optionsContainer.style.display = 'grid';
+        }
+        if (elements.inputContainer) {
+            elements.inputContainer.innerHTML = '';
+            elements.inputContainer.style.display = 'none';
+        }
         if (elements.nextBtn) elements.nextBtn.disabled = true;
         
         // Show/hide back button
@@ -1300,13 +1382,25 @@ document.addEventListener('DOMContentLoaded', async function() {
             elements.backBtn.style.display = state.questionHistory.length > 1 ? 'flex' : 'none';
         }
         
-        // Load question type
-        if (question.type === 'single') {
-            loadSingleChoice(question);
-        } else if (question.type === 'multi') {
-            loadMultiChoice(question);
+        // Load question based on type
+        if (question.type === 'single' || question.type === 'multi') {
+            // MCQ Questions
+            elements.optionsContainer.style.display = 'grid';
+            elements.inputContainer.style.display = 'none';
+            
+            if (question.type === 'single') {
+                loadSingleChoice(question);
+            } else if (question.type === 'multi') {
+                loadMultiChoice(question);
+            }
+        } else if (question.type === 'text' || question.type === 'text-short' || question.type === 'text-long') {
+            // Text Input Questions
+            elements.optionsContainer.style.display = 'none';
+            elements.inputContainer.style.display = 'block';
+            loadTextInput(question);
         } else if (question.type === 'conditional') {
             handleConditionalRouting();
+            return; // Don't proceed with UI updates yet
         }
         
         // Restore answer if exists
@@ -1322,7 +1416,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             elements.questionSubtitle.textContent = question.subtitle || '';
         }
         
-        // Animate
+        // Animate transition
         if (elements.questionContainer) {
             elements.questionContainer.style.opacity = '0';
             requestAnimationFrame(() => {
@@ -1334,38 +1428,52 @@ document.addEventListener('DOMContentLoaded', async function() {
         state.lastAnswerTime = new Date();
     }
 
-    function handleConditionalRouting() {
-        const initialAnswer = state.answers.initial;
-        if (!initialAnswer) return;
+    function updatePathIndicator() {
+        if (!elements.pathIndicator || !elements.pathName) return;
         
-        const selectedValues = initialAnswer.type === 'multi' ? initialAnswer.values : [initialAnswer.value];
-        let path = '';
-        
-        if (selectedValues.includes('none') || (selectedValues.length === 1 && selectedValues[0] === 'none')) {
-            path = 'none';
-        } else if (selectedValues.includes('sports') && selectedValues.includes('esports')) {
-            path = 'combined';
-        } else if (selectedValues.includes('sports')) {
-            path = 'sports-only';
-        } else if (selectedValues.includes('esports')) {
-            path = 'esports-only';
-        }
-        
-        // Update path for analytics
-        if (path === 'combined') state.currentPath = 'Combined';
-        else if (path === 'sports-only') state.currentPath = 'Sports';
-        else if (path === 'esports-only') state.currentPath = 'E-Sports';
-        else if (path === 'none') state.currentPath = 'Non-Player';
-        
-        // Auto-advance to next question
-        setTimeout(() => {
-            const nextId = surveyData['path-selector'].next[path];
-            if (nextId) {
-                state.questionHistory.push('path-selector');
-                updateProgress();
-                loadQuestion(nextId);
+        if (state.currentPath) {
+            elements.pathIndicator.style.display = 'flex';
+            
+            let pathIcon = '';
+            let pathDisplay = '';
+            
+            switch(state.currentPath) {
+                case 'Sports':
+                    pathIcon = '⚽';
+                    pathDisplay = 'Sports Athlete';
+                    break;
+                case 'E-Sports':
+                    pathIcon = '🎮';
+                    pathDisplay = 'Esports Gamer';
+                    break;
+                case 'Combined':
+                    pathIcon = '⚽🎮';
+                    pathDisplay = 'Athlete & Gamer';
+                    break;
+                case 'Non-Player':
+                    pathIcon = '👤';
+                    pathDisplay = 'Non-Player';
+                    break;
+                default:
+                    pathIcon = '🔍';
+                    pathDisplay = 'Exploring';
             }
-        }, 500);
+            
+            elements.pathName.innerHTML = `${pathIcon} ${pathDisplay}`;
+        } else {
+            elements.pathIndicator.style.display = 'none';
+        }
+    }
+
+    function updateQuestionCounter() {
+        if (!elements.questionCounter || !elements.currentQuestion || !elements.totalQuestions) return;
+        
+        const total = getTotalQuestionsForPath();
+        const current = Math.min(state.questionHistory.length - 1, total);
+        
+        elements.currentQuestion.textContent = current;
+        elements.totalQuestions.textContent = total;
+        elements.questionCounter.style.display = 'flex';
     }
 
     function loadSingleChoice(question) {
@@ -1481,6 +1589,66 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
     }
 
+    // ==================== TEXT INPUT HANDLING ====================
+    function loadTextInput(question) {
+        if (!elements.inputContainer) return;
+        
+        const isShort = question.type === 'text-short';
+        const textarea = document.createElement('textarea');
+        textarea.className = `text-input ${isShort ? 'short' : ''}`;
+        textarea.placeholder = question.placeholder || 'Type your answer here...';
+        textarea.rows = isShort ? 2 : 4;
+        
+        // Add character counter for long text
+        if (!isShort) {
+            const counter = document.createElement('div');
+            counter.className = 'character-counter';
+            counter.textContent = '0 characters';
+            elements.inputContainer.appendChild(counter);
+        }
+        
+        // Debounced validation
+        const validateInput = debounce(() => {
+            // Sanitize input
+            let value = textarea.value;
+            
+            // Basic sanitization - remove excessive special chars but keep meaningful ones
+            if (question.type === 'text-short') {
+                value = value.replace(/[^\w\s.,!?@#&()-]/g, '');
+            }
+            
+            if (textarea.value !== value) textarea.value = value;
+            
+            const isValid = value.trim().length > 0;
+            
+            if (elements.nextBtn) {
+                elements.nextBtn.disabled = !isValid;
+            }
+            
+            if (isValid) {
+                state.answers[state.currentQuestionId] = {
+                    type: 'text',
+                    value: value.trim(),
+                    questionType: question.type
+                };
+            }
+            
+            // Update character counter
+            const counter = elements.inputContainer.querySelector('.character-counter');
+            if (counter) {
+                const length = value.trim().length;
+                counter.textContent = `${length} character${length !== 1 ? 's' : ''}`;
+            }
+        }, 300);
+        
+        textarea.addEventListener('input', validateInput);
+        
+        // Focus after a short delay
+        setTimeout(() => textarea.focus(), 150);
+        
+        elements.inputContainer.appendChild(textarea);
+    }
+
     function restoreAnswer(question, questionId) {
         const answer = state.answers[questionId];
         if (!answer) return;
@@ -1502,7 +1670,54 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (elements.nextBtn) {
                 elements.nextBtn.disabled = !answer.values || answer.values.length === 0;
             }
+        } else if (question.type.includes('text')) {
+            const textarea = elements.inputContainer?.querySelector('.text-input');
+            if (textarea && answer.value) {
+                textarea.value = answer.value;
+                if (elements.nextBtn) elements.nextBtn.disabled = false;
+                
+                // Update character counter
+                const counter = elements.inputContainer?.querySelector('.character-counter');
+                if (counter) {
+                    const length = answer.value.length;
+                    counter.textContent = `${length} character${length !== 1 ? 's' : ''}`;
+                }
+            }
         }
+    }
+
+    function handleConditionalRouting() {
+        const initialAnswer = state.answers.initial;
+        if (!initialAnswer) return;
+        
+        const selectedValues = initialAnswer.type === 'multi' ? initialAnswer.values : [initialAnswer.value];
+        let path = '';
+        
+        if (selectedValues.includes('none') || (selectedValues.length === 1 && selectedValues[0] === 'none')) {
+            path = 'none';
+        } else if (selectedValues.includes('sports') && selectedValues.includes('esports')) {
+            path = 'combined';
+        } else if (selectedValues.includes('sports')) {
+            path = 'sports-only';
+        } else if (selectedValues.includes('esports')) {
+            path = 'esports-only';
+        }
+        
+        // Update path for analytics
+        if (path === 'combined') state.currentPath = 'Combined';
+        else if (path === 'sports-only') state.currentPath = 'Sports';
+        else if (path === 'esports-only') state.currentPath = 'E-Sports';
+        else if (path === 'none') state.currentPath = 'Non-Player';
+        
+        // Auto-advance to next question
+        setTimeout(() => {
+            const nextId = surveyData['path-selector'].next[path];
+            if (nextId) {
+                state.questionHistory.push('path-selector');
+                updateProgress();
+                loadQuestion(nextId);
+            }
+        }, 500);
     }
 
     async function goToNextQuestion() {
@@ -1513,15 +1728,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (typeof question.next === 'object') {
             const answer = state.answers[state.currentQuestionId];
             if (answer) {
-                if (answer.type === 'multi') {
-                    // For combined path determination
-                    if (state.currentQuestionId === 'initial') {
-                        nextId = 'path-selector';
-                    } else {
-                        nextId = question.next[answer.value] || Object.values(question.next)[0];
-                    }
+                if (answer.type === 'multi' && state.currentQuestionId === 'initial') {
+                    nextId = 'path-selector';
                 } else {
-                    nextId = question.next[answer.value];
+                    nextId = question.next[answer.value] || Object.values(question.next)[0];
                 }
             } else {
                 nextId = Object.values(question.next)[0];
@@ -1547,7 +1757,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (state.questionHistory.length <= 1) return;
         
         state.questionHistory.pop();
-        state.currentQuestionNumber--;
         
         const prevId = state.questionHistory[state.questionHistory.length - 1];
         
@@ -1570,18 +1779,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         if (elements.progressRingCircle) {
             const circumference = 2 * Math.PI * 52;
-            elements.progressRingCircle.style.strokeDashoffset = 0;
+            elements.progressRingCircle.style.strokeDashoffset = '0';
         }
         
-        // Set thank you message
+        // Set personalized thank you message
         const messages = {
-            'Sports': "Thank you for sharing your sports journey!",
-            'E-Sports': "Thank you for sharing your esports experience!",
-            'Combined': "Thank you for sharing your experience in both sports and esports!",
-            'Non-Player': "Thank you for sharing your perspective!"
+            'Sports': "Thank you for sharing your sports journey! Your experiences will help us build better opportunities for athletes.",
+            'E-Sports': "Thank you for sharing your esports experience! Your insights will shape the future of competitive gaming.",
+            'Combined': "Thank you for sharing your unique journey in both sports and esports! Your perspective is truly valuable.",
+            'Non-Player': "Thank you for sharing your perspective! Your feedback helps us understand how to make sports and esports more accessible."
         };
         
-        const message = messages[state.currentPath] || "Thank you for your feedback!";
+        const message = messages[state.currentPath] || "Thank you for your valuable feedback!";
         const completionMessageEl = document.querySelector('.completion-message');
         if (completionMessageEl) {
             completionMessageEl.textContent = message;
@@ -1609,20 +1818,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function updateProgress() {
-        let totalInPath = 1;
+        const total = getTotalQuestionsForPath();
         let completed = state.questionHistory.length - 1;
         
-        if (state.currentPath === 'Sports') totalInPath = 20;
-        else if (state.currentPath === 'E-Sports') totalInPath = 22;
-        else if (state.currentPath === 'Combined') totalInPath = 24;
-        else if (state.currentPath === 'Non-Player') totalInPath = 2;
+        // Cap at total
+        completed = Math.min(completed, total);
         
-        // Account for initial questions
-        if (state.currentQuestionId === 'initial' || state.currentQuestionId === 'path-selector') {
-            totalInPath = 3;
-        }
-        
-        const percentage = Math.min(Math.round((completed / totalInPath) * 100), 100);
+        const percentage = Math.min(Math.round((completed / total) * 100), 100);
         
         if (elements.progressFill) {
             elements.progressFill.style.width = `${percentage}%`;
@@ -1632,14 +1834,21 @@ document.addEventListener('DOMContentLoaded', async function() {
         }
         
         const messages = [
-            "Starting...", "Moving ahead!", "Great progress!", "Halfway there!", 
-            "Almost done!", "Final stretch!", "Complete!"
+            "Starting your journey...", 
+            "Making progress!", 
+            "Great insights!", 
+            "Halfway there!", 
+            "Almost done!", 
+            "Final stretch!", 
+            "Complete!"
         ];
-        const msgIndex = Math.min(Math.floor(percentage / 15), messages.length - 1);
+        
+        const msgIndex = Math.min(Math.floor(percentage / 16.67), messages.length - 1);
         if (elements.progressMessage) {
             elements.progressMessage.textContent = messages[msgIndex] || "Almost there!";
         }
         
+        // Subtle animation
         if (elements.progressFill) {
             elements.progressFill.style.transform = 'scaleY(1.2)';
             setTimeout(() => {
@@ -1665,6 +1874,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function restartSurvey() {
+        // Reset state
         state.currentQuestionId = 'welcome';
         state.answers = {};
         state.questionHistory = ['welcome'];
@@ -1673,12 +1883,30 @@ document.addEventListener('DOMContentLoaded', async function() {
         state.surveySessionId = generateSessionId();
         state.userStartedAt = new Date();
         
+        // Reset UI
         switchScreen('welcome');
         updateProgress();
+        
+        // Hide path indicator
+        if (elements.pathIndicator) {
+            elements.pathIndicator.style.display = 'none';
+        }
+        
+        // Hide question counter
+        if (elements.questionCounter) {
+            elements.questionCounter.style.display = 'none';
+        }
+        
+        console.log('Survey restarted with new session:', state.surveySessionId);
     }
 
     function handleKeyboardNavigation(e) {
         if (!elements.questionContainer || !elements.questionContainer.classList.contains('active')) return;
+        
+        // Prevent default behavior for these keys
+        if (e.key === 'Enter' || e.key === 'Escape') {
+            e.preventDefault();
+        }
         
         if (e.key === 'Enter' && elements.nextBtn && !elements.nextBtn.disabled) {
             goToNextQuestion();
@@ -1695,9 +1923,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             const confetti = document.createElement('div');
             confetti.className = 'confetti';
             confetti.style.left = `${Math.random() * 100}%`;
-            confetti.style.backgroundColor = ['#6d28d9', '#0ea5e9', '#f59e0b', '#10b981'][i % 4];
+            confetti.style.backgroundColor = ['#8a2be2', '#00d4ff', '#ff0080', '#00ff88'][i % 4];
             confetti.style.animationDelay = `${Math.random() * 2}s`;
-            confetti.style.animationDuration = `${1 + Math.random() * 1}s`;
+            confetti.style.animationDuration = `${1.5 + Math.random() * 1.5}s`;
             container.appendChild(confetti);
         }
     }
