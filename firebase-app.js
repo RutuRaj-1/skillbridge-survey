@@ -1,6 +1,6 @@
 // firebase-app.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getAnalytics, logEvent } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
+import { getAnalytics, logEvent, isSupported } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js";
 import { 
     getFirestore, 
     collection, 
@@ -11,9 +11,11 @@ import {
     serverTimestamp, 
     increment,
     getDocs,
+    getDoc,  // ✅ ADDED - was missing
     query,
     orderBy,
-    limit
+    limit,
+    enableIndexedDbPersistence // ✅ ADDED - for offline support
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // Firebase configuration
@@ -32,8 +34,33 @@ let app, analytics, db;
 
 try {
     app = initializeApp(firebaseConfig);
-    analytics = getAnalytics(app);
+    
+    // ✅ FIX: Check if analytics is supported (prevents errors in some environments)
+    const analyticsSupported = await isSupported();
+    if (analyticsSupported) {
+        analytics = getAnalytics(app);
+    } else {
+        console.log('📊 Analytics not supported in this environment');
+        analytics = {
+            logEvent: (eventName, eventParams) => {
+                console.log(`[Analytics] ${eventName}:`, eventParams);
+            }
+        };
+    }
+    
     db = getFirestore(app);
+    
+    // ✅ ADDED: Enable offline persistence
+    try {
+        await enableIndexedDbPersistence(db);
+        console.log('💾 Offline persistence enabled');
+    } catch (err) {
+        if (err.code === 'failed-precondition') {
+            console.warn('⚠️ Multiple tabs open, persistence disabled');
+        } else if (err.code === 'unimplemented') {
+            console.warn('⚠️ Browser doesn\'t support persistence');
+        }
+    }
     
     console.log('🔥 Firebase initialized successfully');
 } catch (error) {
@@ -48,11 +75,20 @@ try {
     };
     db = {
         collection: () => ({
-            add: () => Promise.reject('Firebase not initialized'),
-            get: () => Promise.reject('Firebase not initialized')
+            addDoc: () => Promise.reject('Firebase not initialized'),
+            get: () => Promise.reject('Firebase not initialized'),
+            where: () => ({ get: () => Promise.reject('Firebase not initialized') })
+        }),
+        doc: () => ({
+            get: () => Promise.reject('Firebase not initialized'),
+            set: () => Promise.reject('Firebase not initialized'),
+            update: () => Promise.reject('Firebase not initialized')
         })
     };
 }
+
+// ✅ ADDED: Queue for offline operations
+const pendingOperations = [];
 
 // Helper functions for common operations
 const firebaseService = {
@@ -65,24 +101,106 @@ const firebaseService = {
                 updatedAt: serverTimestamp()
             });
             
-            logEvent(analytics, 'survey_completed', {
-                survey_path: surveyData.path,
-                question_count: surveyData.completedQuestions,
-                session_id: surveyData.sessionId
-            });
+            if (analytics) {
+                logEvent(analytics, 'survey_completed', {
+                    survey_path: surveyData.path,
+                    question_count: surveyData.completedQuestions,
+                    session_id: surveyData.sessionId
+                });
+            }
             
             return { success: true, id: docRef.id };
         } catch (error) {
             console.error('Error saving survey:', error);
+            
+            // ✅ ADDED: Queue for offline retry
+            if (error.code === 'unavailable' || error.code === 'failed-precondition') {
+                pendingOperations.push({
+                    type: 'save',
+                    data: surveyData,
+                    timestamp: Date.now()
+                });
+                
+                // Store in localStorage as backup
+                this.saveToLocalStorage(surveyData);
+            }
+            
             return { success: false, error: error.message };
         }
     },
     
-    // Update analytics
+    // ✅ ADDED: Local storage fallback
+    saveToLocalStorage(surveyData) {
+        try {
+            const pending = JSON.parse(localStorage.getItem('pending_surveys') || '[]');
+            pending.push({
+                ...surveyData,
+                localId: 'local_' + Date.now(),
+                savedAt: new Date().toISOString()
+            });
+            // Keep only last 20 surveys
+            localStorage.setItem('pending_surveys', JSON.stringify(pending.slice(-20)));
+        } catch (e) {
+            console.error('Local storage save failed:', e);
+        }
+    },
+    
+    // ✅ ADDED: Retry pending operations
+    async retryPendingOperations() {
+        const pending = JSON.parse(localStorage.getItem('pending_surveys') || '[]');
+        if (pending.length === 0) return { success: true, count: 0 };
+        
+        const successful = [];
+        const failed = [];
+        
+        for (const survey of pending) {
+            try {
+                const result = await this.saveSurveyResponse(survey);
+                if (result.success) {
+                    successful.push(survey.localId);
+                    await this.updateAnalytics(survey.path);
+                } else {
+                    failed.push(survey.localId);
+                }
+            } catch (error) {
+                failed.push(survey.localId);
+            }
+        }
+        
+        // Remove successful ones from storage
+        const remaining = pending.filter(s => failed.includes(s.localId));
+        localStorage.setItem('pending_surveys', JSON.stringify(remaining));
+        
+        return { 
+            success: true, 
+            synced: successful.length, 
+            remaining: remaining.length 
+        };
+    },
+    
+    // Update analytics with support for Combined path
     async updateAnalytics(path) {
         try {
             const analyticsRef = doc(db, 'survey_analytics', 'completions');
-            const pathKey = `${path.toLowerCase().replace('-', '')}_completions`;
+            
+            // ✅ FIX: Added Combined path support
+            let pathKey;
+            switch(path) {
+                case 'Sports':
+                    pathKey = 'sports_completions';
+                    break;
+                case 'E-Sports':
+                    pathKey = 'esports_completions';
+                    break;
+                case 'Combined':
+                    pathKey = 'combined_completions';
+                    break;
+                case 'Non-Player':
+                    pathKey = 'nonplayer_completions';
+                    break;
+                default:
+                    pathKey = 'other_completions';
+            }
             
             await updateDoc(analyticsRef, {
                 total_completions: increment(1),
@@ -94,13 +212,15 @@ const firebaseService = {
             return { success: true };
         } catch (error) {
             // If document doesn't exist, create it
-            if (error.code === 'not-found') {
+            if (error.code === 'not-found' || error.message.includes('not-found')) {
                 try {
                     await setDoc(doc(db, 'survey_analytics', 'completions'), {
                         total_completions: 1,
                         sports_completions: path === 'Sports' ? 1 : 0,
                         esports_completions: path === 'E-Sports' ? 1 : 0,
+                        combined_completions: path === 'Combined' ? 1 : 0, // ✅ ADDED
                         nonplayer_completions: path === 'Non-Player' ? 1 : 0,
+                        other_completions: 0,
                         last_completed: serverTimestamp(),
                         createdAt: serverTimestamp(),
                         updatedAt: serverTimestamp()
@@ -132,7 +252,8 @@ const firebaseService = {
             querySnapshot.forEach((doc) => {
                 surveys.push({
                     id: doc.id,
-                    ...doc.data()
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt?.toDate() || null
                 });
             });
             
@@ -163,20 +284,43 @@ const firebaseService = {
     // Log custom event
     logEvent(eventName, eventParams = {}) {
         try {
-            logEvent(analytics, eventName, {
-                ...eventParams,
-                timestamp: new Date().toISOString(),
-                userAgent: navigator.userAgent
-            });
+            if (analytics) {
+                logEvent(analytics, eventName, {
+                    ...eventParams,
+                    timestamp: new Date().toISOString()
+                });
+            } else {
+                console.log(`[Analytics] ${eventName}:`, eventParams);
+            }
         } catch (error) {
-            console.log(`[Analytics] ${eventName}:`, eventParams);
+            console.log(`[Analytics Fallback] ${eventName}:`, eventParams);
+        }
+    },
+    
+    // ✅ ADDED: Check connection status
+    isOnline() {
+        return navigator.onLine;
+    },
+    
+    // ✅ ADDED: Get pending surveys count
+    getPendingCount() {
+        try {
+            const pending = JSON.parse(localStorage.getItem('pending_surveys') || '[]');
+            return pending.length;
+        } catch {
+            return 0;
         }
     }
 };
 
-// Add offline support detection
-const isOnline = () => navigator.onLine;
-const queue = [];
+// ✅ ADDED: Auto-retry on connection
+if (typeof window !== 'undefined') {
+    window.addEventListener('online', async () => {
+        console.log('🔄 Connection restored, retrying pending operations...');
+        const result = await firebaseService.retryPendingOperations();
+        console.log(`✅ Synced ${result.synced} surveys, ${result.remaining} remaining`);
+    });
+}
 
 // Export everything
 export { 
@@ -191,16 +335,16 @@ export {
     serverTimestamp, 
     increment,
     getDocs,
+    getDoc,  // ✅ Now exported
     query,
     orderBy,
-    limit,
-    getDoc // Add this import if missing
+    limit
 };
 
 // Export the service object for easy use
 export default firebaseService;
 
-// Also attach to window for debugging (remove in production)
-if (typeof window !== 'undefined') {
+// Attach to window for debugging (remove in production)
+if (typeof window !== 'undefined' && process.env.NODE_ENV !== 'production') {
     window.firebaseService = firebaseService;
 }

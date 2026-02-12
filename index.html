@@ -3,19 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkillBridge | Athlete & Gamers Experience Survey</title>
+    <title>SkillBridge | Athletes & Gamers Experience Survey</title>
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="style.css" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" as="style">
+    
+    <!-- Stylesheets -->
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Meta tags for better mobile experience -->
+    <meta name="description" content="Shape the future of Sports and Esports with SkillBridge. Share your journey as an athlete or gamer through our premium survey experience.">
+    <meta name="theme-color" content="#8a2be2">
+    
+    <!-- Favicon (add these files to your project) -->
+    <!-- <link rel="icon" type="image/png" href="/favicon.png"> -->
+    
+    <style>
+        /* Critical CSS to prevent layout shift */
+        .screen { display: none; }
+        .screen.active { display: flex; }
+        .progress-fill { width: 0%; }
+        body { opacity: 1; transition: opacity 0.3s ease; }
+    </style>
 </head>
 <body>
+    <!-- Animated Background (NEW) -->
+    <div class="animated-bg"></div>
+    <div class="grid-lines"></div>
+    <div class="floating-particles" id="particles"></div>
+
     <div class="container">
-        <!-- Progress Bar -->
+        <!-- Progress Bar - UPDATED with proper structure -->
         <div class="progress-container">
             <div class="progress-bar">
-                <div class="progress-fill"></div>
+                <div class="progress-fill" style="width: 0%;"></div>
             </div>
             <div class="progress-text">
                 <span class="progress-percent">0%</span>
@@ -29,15 +55,19 @@
             <div class="screen active" id="welcome-screen">
                 <div class="welcome-content">
                     <div class="logo">
-                        <span class="logo-icon">🏆</span>
+                        <span class="logo-icon">🎮⚽</span> <!-- UPDATED: Dual icons -->
                         <h1 class="logo-text">SkillBridge</h1>
                     </div>
-                    <h2 class="welcome-title">Shape the Future of Sports And Esports</h2>
+                    <h2 class="welcome-title">Shape the Future of Sports & Esports</h2>
                     <p class="welcome-subtitle">Help us build a better platform for Athletes and Gamers. Share your journey through this immersive, premium experience.</p>
-                    <button class="btn-primary start-survey-btn">
+                    
+                    <!-- Path indicator removed from here - only shown during survey -->
+                    
+                    <button class="btn-primary start-survey-btn" id="start-survey-btn">
                         Begin Experience
                         <i class="fas fa-arrow-right"></i>
                     </button>
+                    
                     <div class="welcome-features">
                         <div class="feature">
                             <i class="fas fa-shield-alt"></i>
@@ -49,29 +79,46 @@
                         </div>
                         <div class="feature">
                             <i class="fas fa-trophy"></i>
-                            <span>Premium & Immersive Experience</span>
+                            <span>Multiple Paths Available</span> <!-- UPDATED text -->
                         </div>
+                    </div>
+                    
+                    <!-- Offline status indicator (NEW) -->
+                    <div class="offline-indicator" id="offline-indicator" style="display: none;">
+                        <i class="fas fa-wifi-slash"></i>
+                        <span>Working offline - data will sync when connected</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Question Screens -->
+            <!-- Question Screens - UPDATED structure -->
             <div class="screen" id="question-container">
-                <div class="question-header">
-                    <h2 class="question-title"></h2>
-                    <p class="question-subtitle"></p>
+                <!-- Path indicator (NEW) -->
+                <div class="path-indicator" id="path-indicator" style="display: none;">
+                    <i class="fas fa-route"></i>
+                    <span id="path-name"></span>
                 </div>
                 
-                <div class="options-container">
+                <div class="question-header">
+                    <h2 class="question-title" id="question-title"></h2>
+                    <p class="question-subtitle" id="question-subtitle"></p>
+                    
+                    <!-- Question counter (NEW) -->
+                    <div class="question-counter" id="question-counter" style="display: none;">
+                        <span class="current" id="current-question">0</span>
+                        <span class="total">/</span>
+                        <span class="total" id="total-questions">0</span>
+                    </div>
+                </div>
+                
+                <div class="options-container" id="options-container">
                     <!-- Options will be dynamically inserted here -->
                 </div>
                 
-                <div class="input-container">
-                    <!-- Text input will be dynamically inserted here -->
-                </div>
+                <!-- REMOVED: input-container - not needed for MCQ-only survey -->
                 
                 <div class="navigation">
-                    <button class="btn-secondary" id="back-btn">
+                    <button class="btn-secondary" id="back-btn" style="display: none;">
                         <i class="fas fa-arrow-left"></i>
                         Back
                     </button>
@@ -80,48 +127,107 @@
                         <i class="fas fa-arrow-right"></i>
                     </button>
                 </div>
+                
+                <!-- Loading indicator for async operations (NEW) -->
+                <div class="loading-dots" id="loading-indicator" style="display: none;">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
             </div>
 
-            <!-- Thank You Screen -->
+            <!-- Thank You Screen - ENHANCED -->
             <div class="screen" id="thank-you-screen">
                 <div class="thank-you-content">
-                    <div class="celebration-animation">
-                        <div class="confetti"></div>
-                        <div class="confetti"></div>
-                        <div class="confetti"></div>
-                        <div class="confetti"></div>
-                        <div class="confetti"></div>
-                        <div class="confetti"></div>
+                    <div class="celebration-animation" id="celebration-animation">
+                        <!-- Confetti will be generated by JS -->
                     </div>
+                    
                     <div class="logo">
                         <span class="logo-icon">🏆</span>
                         <h1 class="logo-text">SkillBridge</h1>
                     </div>
+                    
                     <h2 class="thank-you-title">Journey Complete!</h2>
+                    
                     <div class="completion-stats">
                         <div class="completion-circle">
-                            <svg class="progress-ring" width="120" height="120">
-                                <circle class="progress-ring-circle" stroke="#6d28d9" stroke-width="8" fill="transparent" r="52" cx="60" cy="60"/>
+                            <svg class="progress-ring" width="160" height="160" viewBox="0 0 120 120"> <!-- UPDATED size -->
+                                <circle class="progress-ring-circle" 
+                                        stroke="#8a2be2" 
+                                        stroke-width="8" 
+                                        fill="transparent" 
+                                        r="52" 
+                                        cx="60" 
+                                        cy="60"
+                                        style="stroke-dasharray: 326.726; stroke-dashoffset: 326.726;"/>
                             </svg>
                             <span class="completion-percent">100%</span>
                         </div>
-                        <p class="completion-message">Your insights will help shape the future for Sport athletes & Esports Gamers in India  </p>
+                        <p class="completion-message" id="completion-message">
+                            Your insights will help shape the future for athletes and gamers in India
+                        </p>
                     </div>
-                    <div class="thank-you-message">
+                    
+                    <div class="thank-you-message" id="thank-you-message">
                         <p>Thank you for sharing your experience with us. Your journey matters, and your feedback will directly influence how we build SkillBridge to better serve athletes and gamers like you.</p>
                     </div>
+                    
+                    <!-- Submission status (NEW) -->
+                    <div class="submission-status" id="submission-status" style="display: none;"></div>
+                    
+                    <!-- Restart button (NEW) -->
+                    <button class="btn-secondary" id="restart-btn" style="margin-top: 30px;">
+                        <i class="fas fa-redo-alt"></i>
+                        Take Another Survey
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Background Elements -->
-        <div class="background-animation">
-            <div class="gradient-circle circle-1"></div>
-            <div class="gradient-circle circle-2"></div>
-            <div class="gradient-circle circle-3"></div>
+        <!-- Background Elements - ENHANCED -->
+        <div class="background-elements">
+            <div class="gradient-sphere sphere-1"></div>
+            <div class="gradient-sphere sphere-2"></div>
+            <div class="gradient-sphere sphere-3"></div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Load Firebase modules with module type -->
+    <script type="module">
+        // Import Firebase modules first
+        import firebaseService from './firebase-app.js';
+        window.firebaseService = firebaseService;
+        console.log('Firebase module loaded');
+    </script>
+    
+    <!-- Load survey script after Firebase -->
+    <script type="module" src="script.js"></script>
+    
+    <!-- Register service worker for offline support (OPTIONAL) -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => {
+                    console.log('Service worker registration skipped:', err);
+                });
+            });
+        }
+        
+        // Detect offline/online status
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        function updateOnlineStatus() {
+            const indicator = document.getElementById('offline-indicator');
+            if (indicator) {
+                if (navigator.onLine) {
+                    indicator.style.display = 'none';
+                } else {
+                    indicator.style.display = 'flex';
+                }
+            }
+        }
+    </script>
 </body>
 </html>

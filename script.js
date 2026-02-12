@@ -71,11 +71,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                     });
                     return { success: true };
                 } catch (error) {
-                    // Create analytics doc if it doesn't exist
                     await setDoc(doc(db, 'survey_analytics', 'completions'), {
                         total_completions: 1,
                         sports_completions: path === 'Sports' ? 1 : 0,
                         esports_completions: path === 'E-Sports' ? 1 : 0,
+                        combined_completions: path === 'Combined' ? 1 : 0,
                         nonplayer_completions: path === 'Non-Player' ? 1 : 0,
                         last_completed: serverTimestamp(),
                         createdAt: serverTimestamp()
@@ -86,13 +86,12 @@ document.addEventListener('DOMContentLoaded', async function() {
         };
         
         firebaseAvailable = true;
-        console.log('✅ Firebase initialized successfully');
+        console.log('Firebase initialized successfully');
         
     } catch (error) {
-        console.warn('⚠️ Firebase not available, using local storage:', error);
+        console.warn('Firebase not available, using local storage:', error);
         firebaseService = {
             async saveSurvey(surveyData) {
-                // Fallback to localStorage
                 const stored = JSON.parse(localStorage.getItem('survey_backup') || '[]');
                 stored.push({
                     ...surveyData,
@@ -112,46 +111,402 @@ document.addEventListener('DOMContentLoaded', async function() {
     const surveyData = {
         initial: {
             id: 'initial',
-            title: 'Have you ever played Sports  or  E-Sports?',
-            subtitle: 'This will help us personalize your experience',
-            type: 'single',
+            title: 'Which of these have you played?',
+            subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
-                { text: 'Yes', value: 'yes' },
-                { text: 'No', value: 'no' }
+                { text: 'Sports', value: 'sports' },
+                { text: 'E-Sports', value: 'esports' },
+                { text: 'None', value: 'none' }
             ],
+            next: 'path-selector'
+        },
+        
+        'path-selector': {
+            id: 'path-selector',
+            title: 'Based on your selection',
+            subtitle: 'We will customize the experience for you',
+            type: 'conditional',
             next: {
-                'yes': 'player-type',
-                'no': 'no-reason'
+                'sports-only': 'sports-1',
+                'esports-only': 'esports-1',
+                'combined': 'combined-1',
+                'none': 'no-reason'
             }
         },
         
         'no-reason': {
             id: 'no-reason',
             title: 'What kept you from exploring sports or esports?',
-            subtitle: 'Your honest thoughts help us understand barriers',
-            type: 'text-long',
+            subtitle: 'Select the main reason',
+            type: 'single',
+            options: [
+                { text: 'Focus on academics', value: 'academics' },
+                { text: 'Cost constraints', value: 'cost' },
+                { text: 'Health/injury issues', value: 'health' },
+                { text: 'No access nearby', value: 'access' },
+                { text: 'Family did not support', value: 'family' },
+                { text: 'No time', value: 'time' },
+                { text: 'Never interested', value: 'interest' },
+                { text: 'Fear of failure', value: 'fear' },
+                { text: 'Started too late', value: 'late-start' }
+            ],
             next: 'thank-you'
         },
         
-        'player-type': {
-            id: 'player-type',
-            title: 'What have you played?',
-            subtitle: 'Choose the category that best describes your experience',
+        // ============ COMBINED SPORTS + E-SPORTS PATH ============
+        'combined-1': { 
+            id: 'combined-1', 
+            title: 'Which do you prioritize more?', 
             type: 'single',
             options: [
-                { text: '🏀 Sports', value: 'sports' },
-                { text: '🎮 E-Sports', value: 'esports' }
+                { text: 'Sports', value: 'sports' },
+                { text: 'E-Sports', value: 'esports' },
+                { text: 'Both equally', value: 'both' }
             ],
-            next: {
-                'sports': 'sports-1',
-                'esports': 'esports-1'
-            }
+            next: 'combined-2' 
         },
         
-        // Sports Survey (19 questions)
-        'sports-1': { id: 'sports-1', title: 'What is the single biggest struggle you are facing right now in your sports journey?', type: 'text-long', next: 'sports-2' },
-        'sports-2': { id: 'sports-2', title: 'If you decided today to become a professional athlete, what steps would you take next? Where are you confused?', type: 'text-long', next: 'sports-3' },
-        'sports-3': { id: 'sports-3', title: 'Have you ever seriously thought of quitting sports? What pushed you?', type: 'text-long', next: 'sports-4' },
+        'combined-2': { 
+            id: 'combined-2', 
+            title: 'What is your biggest struggle across both?', 
+            type: 'single',
+            options: [
+                { text: 'Time management between both', value: 'time' },
+                { text: 'Financial constraints', value: 'financial' },
+                { text: 'Finding good coaching/training', value: 'coaching' },
+                { text: 'Balancing with education', value: 'education' },
+                { text: 'Family support', value: 'family' },
+                { text: 'Physical vs mental burnout', value: 'burnout' },
+                { text: 'Opportunities in both fields', value: 'opportunities' }
+            ],
+            next: 'combined-3' 
+        },
+        
+        'combined-3': { 
+            id: 'combined-3', 
+            title: 'Do you see synergy between sports and esports?', 
+            type: 'single',
+            options: [
+                { text: 'Yes, they complement each other', value: 'yes-complement' },
+                { text: 'Somewhat, but very different', value: 'somewhat' },
+                { text: 'No, completely different', value: 'no' },
+                { text: 'Not sure', value: 'unsure' }
+            ],
+            next: 'combined-4' 
+        },
+        
+        'combined-4': { 
+            id: 'combined-4', 
+            title: 'What skills from sports help you in esports?', 
+            type: 'multi',
+            options: [
+                { text: 'Hand-eye coordination', value: 'coordination' },
+                { text: 'Team communication', value: 'communication' },
+                { text: 'Competitive mindset', value: 'mindset' },
+                { text: 'Discipline/practice routine', value: 'discipline' },
+                { text: 'Handling pressure', value: 'pressure' },
+                { text: 'Physical fitness/stamina', value: 'fitness' },
+                { text: 'None', value: 'none' }
+            ],
+            next: 'combined-5' 
+        },
+        
+        'combined-5': { 
+            id: 'combined-5', 
+            title: 'What skills from esports help you in sports?', 
+            type: 'multi',
+            options: [
+                { text: 'Strategic thinking', value: 'strategy' },
+                { text: 'Quick decision making', value: 'decisions' },
+                { text: 'Reaction time', value: 'reaction' },
+                { text: 'Pattern recognition', value: 'patterns' },
+                { text: 'Adaptability', value: 'adaptability' },
+                { text: 'Focus/concentration', value: 'focus' },
+                { text: 'None', value: 'none' }
+            ],
+            next: 'combined-6' 
+        },
+        
+        'combined-6': { 
+            id: 'combined-6', 
+            title: 'How do you split your practice time?', 
+            type: 'single',
+            options: [
+                { text: '70% Sports, 30% E-Sports', value: '70-30-sports' },
+                { text: '50% Sports, 50% E-Sports', value: '50-50' },
+                { text: '30% Sports, 70% E-Sports', value: '30-70-esports' },
+                { text: 'Varies based on season', value: 'seasonal' },
+                { text: 'More time on whichever has opportunities', value: 'opportunity-based' }
+            ],
+            next: 'combined-7' 
+        },
+        
+        'combined-7': { 
+            id: 'combined-7', 
+            title: 'Have you faced criticism for pursuing both?', 
+            type: 'single',
+            options: [
+                { text: 'Yes, from family', value: 'family' },
+                { text: 'Yes, from coaches', value: 'coaches' },
+                { text: 'Yes, from peers', value: 'peers' },
+                { text: 'No, people are supportive', value: 'supportive' },
+                { text: 'No one knows I do both', value: 'hidden' }
+            ],
+            next: 'combined-8' 
+        },
+        
+        'combined-8': { 
+            id: 'combined-8', 
+            title: 'If a platform existed for both sports and esports, what would you want?', 
+            type: 'multi',
+            options: [
+                { text: 'Cross-training programs', value: 'cross-training' },
+                { text: 'Scholarships for multi-sport athletes', value: 'scholarships' },
+                { text: 'Career paths in both', value: 'career-paths' },
+                { text: 'Mental/physical wellness', value: 'wellness' },
+                { text: 'Networking across both communities', value: 'networking' },
+                { text: 'Performance tracking for both', value: 'tracking' }
+            ],
+            next: 'combined-9' 
+        },
+        
+        'combined-9': { 
+            id: 'combined-9', 
+            title: 'Would you pay for such a platform?', 
+            type: 'single',
+            options: [
+                { text: 'Yes, definitely', value: 'yes' },
+                { text: 'Maybe, depends on features', value: 'maybe' },
+                { text: 'No, expect free', value: 'no' }
+            ],
+            next: 'combined-10' 
+        },
+        
+        // Sports-specific questions for combined path
+        'combined-10': { 
+            id: 'combined-10', 
+            title: 'Primary Sport', 
+            type: 'text',
+            next: 'combined-11' 
+        },
+        
+        'combined-11': { 
+            id: 'combined-11', 
+            title: 'Primary E-Sport / Game', 
+            type: 'text',
+            next: 'combined-12' 
+        },
+        
+        'combined-12': { 
+            id: 'combined-12', 
+            title: 'Sports Playing Level', 
+            type: 'single',
+            options: [
+                { text: 'Beginner', value: 'beginner' },
+                { text: 'Intermediate', value: 'intermediate' },
+                { text: 'Advanced', value: 'advanced' },
+                { text: 'Amateur Competitor', value: 'amateur' },
+                { text: 'Semi-Pro', value: 'semi-pro' },
+                { text: 'Professional', value: 'professional' }
+            ],
+            next: 'combined-13' 
+        },
+        
+        'combined-13': { 
+            id: 'combined-13', 
+            title: 'E-Sports Level', 
+            type: 'single',
+            options: [
+                { text: 'Casual', value: 'casual' },
+                { text: 'Intermediate', value: 'intermediate' },
+                { text: 'Advanced', value: 'advanced' },
+                { text: 'Elite', value: 'elite' },
+                { text: 'Semi-pro', value: 'semi-pro' },
+                { text: 'Professional', value: 'professional' }
+            ],
+            next: 'combined-14' 
+        },
+        
+        'combined-14': { 
+            id: 'combined-14', 
+            title: 'Age Group', 
+            type: 'single',
+            options: [
+                { text: 'Under 18', value: 'under-18' },
+                { text: '18-24', value: '18-24' },
+                { text: '25-34', value: '25-34' },
+                { text: '35-44', value: '35-44' },
+                { text: '45+', value: '45-plus' }
+            ],
+            next: 'combined-15' 
+        },
+        
+        'combined-15': { 
+            id: 'combined-15', 
+            title: 'Gender', 
+            type: 'single',
+            options: [
+                { text: 'Male', value: 'male' },
+                { text: 'Female', value: 'female' },
+                { text: 'Non-binary', value: 'non-binary' },
+                { text: 'Prefer not to say', value: 'prefer-not' }
+            ],
+            next: 'combined-16' 
+        },
+        
+        'combined-16': { 
+            id: 'combined-16', 
+            title: 'City', 
+            type: 'text',
+            next: 'combined-17' 
+        },
+        
+        'combined-17': { 
+            id: 'combined-17', 
+            title: 'How do you view sports?', 
+            type: 'single',
+            options: [
+                { text: 'Hobby', value: 'hobby' },
+                { text: 'Serious career', value: 'career' },
+                { text: 'Undecided', value: 'undecided' },
+                { text: 'Passion but not career', value: 'passion' }
+            ],
+            next: 'combined-18' 
+        },
+        
+        'combined-18': { 
+            id: 'combined-18', 
+            title: 'How do you view esports?', 
+            type: 'single',
+            options: [
+                { text: 'Hobby', value: 'hobby' },
+                { text: 'Serious career', value: 'career' },
+                { text: 'Undecided', value: 'undecided' },
+                { text: 'Passion but not career', value: 'passion' }
+            ],
+            next: 'combined-19' 
+        },
+        
+        'combined-19': { 
+            id: 'combined-19', 
+            title: 'Family support for sports?', 
+            type: 'single',
+            options: [
+                { text: 'Strongly supportive', value: 'strong' },
+                { text: 'Somewhat supportive', value: 'somewhat' },
+                { text: 'Neutral', value: 'neutral' },
+                { text: 'Not supportive', value: 'not' }
+            ],
+            next: 'combined-20' 
+        },
+        
+        'combined-20': { 
+            id: 'combined-20', 
+            title: 'Family support for esports?', 
+            type: 'single',
+            options: [
+                { text: 'Strongly supportive', value: 'strong' },
+                { text: 'Somewhat supportive', value: 'somewhat' },
+                { text: 'Neutral', value: 'neutral' },
+                { text: 'Not supportive', value: 'not' }
+            ],
+            next: 'combined-21' 
+        },
+        
+        'combined-21': { 
+            id: 'combined-21', 
+            title: 'Weekly training hours - Sports', 
+            type: 'single',
+            options: [
+                { text: '< 5 hours', value: '<5' },
+                { text: '5-10 hours', value: '5-10' },
+                { text: '11-20 hours', value: '11-20' },
+                { text: '21-30 hours', value: '21-30' },
+                { text: '30+ hours', value: '30+' }
+            ],
+            next: 'combined-22' 
+        },
+        
+        'combined-22': { 
+            id: 'combined-22', 
+            title: 'Weekly gaming hours - E-Sports', 
+            type: 'single',
+            options: [
+                { text: '< 10 hours', value: '<10' },
+                { text: '10-20 hours', value: '10-20' },
+                { text: '20-30 hours', value: '20-30' },
+                { text: '30-40 hours', value: '30-40' },
+                { text: '40+ hours', value: '40+' }
+            ],
+            next: 'combined-23' 
+        },
+        
+        'combined-23': { 
+            id: 'combined-23', 
+            title: 'Which career are you more likely to pursue?', 
+            type: 'single',
+            options: [
+                { text: 'Sports', value: 'sports' },
+                { text: 'E-Sports', value: 'esports' },
+                { text: 'Both professionally', value: 'both' },
+                { text: 'Neither - just hobbies', value: 'neither' }
+            ],
+            next: 'thank-you' 
+        },
+        
+        // ============ SPORTS ONLY PATH ============
+        'sports-1': { 
+            id: 'sports-1', 
+            title: 'What is your biggest struggle(s) right now?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Cost/financial', value: 'financial' },
+                { text: 'Finding good coaching', value: 'coaching' },
+                { text: 'Time management', value: 'time' },
+                { text: 'Getting opportunities/trials', value: 'opportunities' },
+                { text: 'Physical fitness/injuries', value: 'physical' },
+                { text: 'Mental pressure/confidence', value: 'mental' },
+                { text: 'Balancing education', value: 'education' },
+                { text: 'Family support', value: 'family' }
+            ],
+            next: 'sports-2' 
+        },
+        
+        'sports-2': { 
+            id: 'sports-2', 
+            title: 'What stops you from taking steps toward pro sports?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Don\'t know the path/roadmap', value: 'dont-know-path' },
+                { text: 'Don\'t know right academies', value: 'dont-know-academies' },
+                { text: 'Need financial support first', value: 'financial' },
+                { text: 'Need to finish education', value: 'education' },
+                { text: 'Family expects different career', value: 'family-pressure' },
+                { text: 'Recovering from injury', value: 'injury' },
+                { text: 'Don\'t know selection criteria', value: 'criteria' }
+            ],
+            next: 'sports-3' 
+        },
+        
+        'sports-3': { 
+            id: 'sports-3', 
+            title: 'If you thought of quitting, what was the main reason(s)?', 
+            subtitle: 'Select all that apply',
+            type: 'multi',
+            options: [
+                { text: 'Lack of progress/improvement', value: 'no-progress' },
+                { text: 'Recurring injuries', value: 'injuries' },
+                { text: 'Financial pressure', value: 'cost' },
+                { text: 'Burnout/exhaustion', value: 'burnout' },
+                { text: 'Lost motivation/passion', value: 'motivation' },
+                { text: 'Toxic environment/people', value: 'toxic' },
+                { text: 'Academic pressure', value: 'academics' },
+                { text: 'Never thought of quitting', value: 'never' }
+            ],
+            next: 'sports-4' 
+        },
+        
         'sports-4': { 
             id: 'sports-4', 
             title: 'Do you feel you are getting enough opportunities today?', 
@@ -163,7 +518,23 @@ document.addEventListener('DOMContentLoaded', async function() {
             ],
             next: 'sports-4a'
         },
-        'sports-4a': { id: 'sports-4a', title: 'Why?', type: 'text-short', next: 'sports-5' },
+        
+        'sports-4a': { 
+            id: 'sports-4a', 
+            title: 'Why do you feel this way about opportunities?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Limited in my city/region', value: 'location' },
+                { text: 'Only for elite players', value: 'elite-only' },
+                { text: 'Don\'t know where to find', value: 'awareness' },
+                { text: 'Too expensive', value: 'expensive' },
+                { text: 'Too much competition', value: 'competition' },
+                { text: 'Few academies/clubs', value: 'infrastructure' },
+                { text: 'Opportunities are rare', value: 'rare' }
+            ],
+            next: 'sports-5' 
+        },
+        
         'sports-5': { 
             id: 'sports-5', 
             title: 'Have you ever missed an opportunity due to lack of guidance?', 
@@ -173,15 +544,63 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Yes, once/twice', value: 'once' },
                 { text: 'No, never', value: 'no' }
             ],
-            next: 'sports-6'
+            next: 'sports-6' 
         },
-        'sports-6': { id: 'sports-6', title: 'How do you judge whether a coach or academy is good?', type: 'text-long', next: 'sports-7' },
-        'sports-7': { id: 'sports-7', title: 'What is missing or frustrating in the current sports ecosystem?', type: 'text-long', next: 'sports-8' },
-        'sports-8': { id: 'sports-8', title: 'What ONE thing would make you confident choosing sports full time?', type: 'text-long', next: 'sports-9' },
+        
+        'sports-6': { 
+            id: 'sports-6', 
+            title: 'What matters most when choosing a coach/academy?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Student results/alumni', value: 'results' },
+                { text: 'Online reviews/ratings', value: 'reviews' },
+                { text: 'Word of mouth', value: 'word-of-mouth' },
+                { text: 'Coach credentials', value: 'credentials' },
+                { text: 'Free trial class', value: 'trial' },
+                { text: 'Current players', value: 'current-players' },
+                { text: 'Training methodology', value: 'methodology' }
+            ],
+            next: 'sports-7' 
+        },
+        
+        'sports-7': { 
+            id: 'sports-7', 
+            title: 'What frustrates you most in sports ecosystem?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'High costs', value: 'high-cost' },
+                { text: 'Unclear career paths', value: 'unclear-paths' },
+                { text: 'Poor infrastructure', value: 'poor-infra' },
+                { text: 'Lack of transparency', value: 'transparency' },
+                { text: 'Nepotism/favoritism', value: 'nepotism' },
+                { text: 'Complex selection process', value: 'selection' },
+                { text: 'Limited tournaments', value: 'tournaments' },
+                { text: 'Mental health support', value: 'mental-health' }
+            ],
+            next: 'sports-8' 
+        },
+        
+        'sports-8': { 
+            id: 'sports-8', 
+            title: 'What would give you confidence to choose sports full-time?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Guaranteed minimum income', value: 'income' },
+                { text: 'Professional contract offer', value: 'contract' },
+                { text: 'Scholarship opportunity', value: 'scholarship' },
+                { text: 'Family approval', value: 'family' },
+                { text: 'Proven success path', value: 'success-path' },
+                { text: 'Elite coach mentor', value: 'mentor' },
+                { text: 'Performance analytics', value: 'analytics' }
+            ],
+            next: 'sports-9' 
+        },
+        
         'sports-9': { 
             id: 'sports-9', 
             title: 'If a single platform existed, what would you want most?', 
-            type: 'single',
+            subtitle: 'Select all that apply',
+            type: 'multi',
             options: [
                 { text: 'Verified coaches & academies', value: 'verified' },
                 { text: 'Clear career roadmaps', value: 'roadmaps' },
@@ -191,8 +610,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Parent guidance', value: 'parent' },
                 { text: 'Mental & injury support', value: 'support' }
             ],
-            next: 'sports-10'
+            next: 'sports-10' 
         },
+        
         'sports-10': { 
             id: 'sports-10', 
             title: 'If it helped you, would you pay?', 
@@ -202,8 +622,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'No, expect free', value: 'no' },
                 { text: 'Depends on value', value: 'depends' }
             ],
-            next: 'sports-11'
+            next: 'sports-11' 
         },
+        
         'sports-11': { 
             id: 'sports-11', 
             title: 'Age Group', 
@@ -215,8 +636,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: '35-44', value: '35-44' },
                 { text: '45+', value: '45-plus' }
             ],
-            next: 'sports-12'
+            next: 'sports-12' 
         },
+        
         'sports-12': { 
             id: 'sports-12', 
             title: 'How do you identify?', 
@@ -224,12 +646,18 @@ document.addEventListener('DOMContentLoaded', async function() {
             options: [
                 { text: 'Male', value: 'male' },
                 { text: 'Female', value: 'female' },
-                { text: 'Non-binary', value: 'non-binary' },
                 { text: 'Prefer not to say', value: 'prefer-not' }
             ],
-            next: 'sports-13'
+            next: 'sports-13' 
         },
-        'sports-13': { id: 'sports-13', title: 'Primary Sport', type: 'text-short', next: 'sports-14' },
+        
+        'sports-13': { 
+            id: 'sports-13', 
+            title: 'Primary Sport(s)', 
+            type: 'text',
+            next: 'sports-14' 
+        },
+        
         'sports-14': { 
             id: 'sports-14', 
             title: 'Current Playing Level', 
@@ -242,8 +670,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Semi-Pro', value: 'semi-pro' },
                 { text: 'Professional', value: 'professional' }
             ],
-            next: 'sports-15'
+            next: 'sports-15' 
         },
+        
         'sports-15': { 
             id: 'sports-15', 
             title: 'Years of Training', 
@@ -255,8 +684,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: '8-12 years', value: '8-12' },
                 { text: '13+ years', value: '13+' }
             ],
-            next: 'sports-16'
+            next: 'sports-16' 
         },
+        
         'sports-16': { 
             id: 'sports-16', 
             title: 'Weekly Training Commitment', 
@@ -268,8 +698,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: '21-30 hours', value: '21-30' },
                 { text: '30+ hours', value: '30+' }
             ],
-            next: 'sports-17'
+            next: 'sports-17' 
         },
+        
         'sports-17': { 
             id: 'sports-17', 
             title: 'Family Support', 
@@ -280,9 +711,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Neutral', value: 'neutral' },
                 { text: 'Not supportive', value: 'not' }
             ],
-            next: 'sports-18'
+            next: 'sports-18' 
         },
-        'sports-18': { id: 'sports-18', title: 'City', type: 'text-short', next: 'sports-19' },
+        
+        'sports-18': { 
+            id: 'sports-18', 
+            title: 'City', 
+            type: 'text',
+            next: 'sports-19' 
+        },
+        
         'sports-19': { 
             id: 'sports-19', 
             title: 'How do you view sports?', 
@@ -293,11 +731,28 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Undecided', value: 'undecided' },
                 { text: 'Passion but not career', value: 'passion' }
             ],
-            next: 'thank-you'
+            next: 'thank-you' 
         },
         
-        // E-Sports Survey (21 questions) - Simplified similar structure
-        'esports-1': { id: 'esports-1', title: 'Biggest problem in your esports journey?', type: 'text-long', next: 'esports-2' },
+        // ============ E-SPORTS ONLY PATH ============
+        'esports-1': { 
+            id: 'esports-1', 
+            title: 'Your biggest esports struggle(s)?', 
+            subtitle: 'Select all that apply',
+            type: 'multi',
+            options: [
+                { text: 'Hitting high rank ', value: 'plateau' },
+                { text: 'No proper coaching', value: 'coaching' },
+                { text: 'Time vs practice', value: 'time' },
+                { text: 'Finding teammates', value: 'teammates' },
+                { text: 'No tournament access', value: 'tournaments' },
+                { text: 'Hardware limitations', value: 'hardware' },
+                { text: 'Family disapproval', value: 'family' },
+                { text: 'Burnout', value: 'burnout' }
+            ],
+            next: 'esports-2' 
+        },
+        
         'esports-2': { 
             id: 'esports-2', 
             title: 'Have you felt stuck in your improvement?', 
@@ -308,8 +763,41 @@ document.addEventListener('DOMContentLoaded', async function() {
             ],
             next: 'esports-2a'
         },
-        'esports-2a': { id: 'esports-2a', title: 'Reason?', type: 'text-short', next: 'esports-3' },
-        'esports-3': { id: 'esports-3', title: 'If you were to pursue esports professionally, what would you do first? What questions or uncertainties would you have?', type: 'text-long', next: 'esports-4' },
+        
+        'esports-2a': { 
+            id: 'esports-2a', 
+            title: 'Why do you feel stuck?', 
+            subtitle: 'Select all that apply',  
+            type: 'multi',
+            options: [
+                { text: 'No structured practice', value: 'no-structure' },
+                { text: 'Don\'t analyze mistakes', value: 'no-analysis' },
+                { text: 'Mental block/tilt', value: 'mental' },
+                { text: 'Playing solo only', value: 'solo' },
+                { text: 'Low game knowledge', value: 'knowledge' },
+                { text: 'Hardware/network issues', value: 'hardware' },
+                { text: 'Not stuck - improving', value: 'improving' }
+            ],
+            next: 'esports-3' 
+        },
+        
+        'esports-3': { 
+            id: 'esports-3', 
+            title: 'What\'s your biggest uncertainty about going pro?', 
+            subtitle: 'Select all that apply',
+            type: 'multi',
+            options: [
+                { text: 'Am I skilled enough?', value: 'skill' },
+                { text: 'Can I earn consistently?', value: 'income' },
+                { text: 'How to join a team?', value: 'join-team' },
+                { text: 'How to get scouted?', value: 'scouted' },
+                { text: 'Career after gaming?', value: 'career-after' },
+                { text: 'Family acceptance?', value: 'family' },
+                { text: 'Balancing education?', value: 'education' }
+            ],
+            next: 'esports-4' 
+        },
+        
         'esports-4': { 
             id: 'esports-4', 
             title: 'Are there enough real opportunities in your Game?', 
@@ -321,8 +809,39 @@ document.addEventListener('DOMContentLoaded', async function() {
             ],
             next: 'esports-4a'
         },
-        'esports-4a': { id: 'esports-4a', title: 'Why?', type: 'text-short', next: 'esports-5' },
-        'esports-5': { id: 'esports-5', title: 'How do you judge coach/team/course trust?', type: 'text-long', next: 'esports-6' },
+        
+        'esports-4a': { 
+            id: 'esports-4a', 
+            title: 'Why do you feel this way?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Small player base', value: 'small-community' },
+                { text: 'Region not supported', value: 'region' },
+                { text: 'Only top players get opportunities', value: 'top-only' },
+                { text: 'Few tournaments', value: 'few-tournaments' },
+                { text: 'No local esports scene', value: 'local-scene' },
+                { text: 'Game is dying', value: 'dying-game' },
+                { text: 'Plenty of opportunities', value: 'plenty' }
+            ],
+            next: 'esports-5' 
+        },
+        
+        'esports-5': { 
+            id: 'esports-5', 
+            title: 'How do you verify if coaching is legit?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Student results/rank', value: 'results' },
+                { text: 'Free YouTube content', value: 'free-content' },
+                { text: 'Community reputation', value: 'reputation' },
+                { text: 'Coach\'s own rank', value: 'coach-rank' },
+                { text: 'Discord testimonials', value: 'testimonials' },
+                { text: 'Trial session', value: 'trial' },
+                { text: 'Don\'t trust any', value: 'no-trust' }
+            ],
+            next: 'esports-6' 
+        },
+        
         'esports-6': { 
             id: 'esports-6', 
             title: 'Have you played tournaments?', 
@@ -333,7 +852,23 @@ document.addEventListener('DOMContentLoaded', async function() {
             ],
             next: 'esports-6a'
         },
-        'esports-6a': { id: 'esports-6a', title: 'Experience details', type: 'text-long', next: 'esports-7' },
+        
+        'esports-6a': { 
+            id: 'esports-6a', 
+            title: 'What was your tournament experience?', 
+            type: 'single',
+            options: [
+                { text: 'Won/placed well', value: 'success' },
+                { text: 'Participated only', value: 'participated' },
+                { text: 'Performed below expectations', value: 'poor-performance' },
+                { text: 'Regular competitor', value: 'regular' },
+                { text: 'Online only', value: 'online' },
+                { text: 'LAN experience', value: 'lan' },
+                { text: 'Never played', value: 'never' }
+            ],
+            next: 'esports-7' 
+        },
+        
         'esports-7': { 
             id: 'esports-7', 
             title: 'What do you rely on to improve?', 
@@ -346,10 +881,41 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Tournaments', value: 'tournaments' },
                 { text: 'Nothing structured', value: 'nothing' }
             ],
-            next: 'esports-8'
+            next: 'esports-8' 
         },
-        'esports-8': { id: 'esports-8', title: 'What is missing there?', type: 'text-long', next: 'esports-9' },
-        'esports-9': { id: 'esports-9', title: 'ONE thing needed to confidently go full-time?', type: 'text-long', next: 'esports-10' },
+        
+        'esports-8': { 
+            id: 'esports-8', 
+            title: 'What\'s missing in current learning resources?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Structured pathway', value: 'structure' },
+                { text: 'Personalized feedback', value: 'feedback' },
+                { text: 'Performance tracking', value: 'tracking' },
+                { text: 'Team coordination training', value: 'teamwork' },
+                { text: 'Mental coaching', value: 'mental' },
+                { text: 'Game-specific content', value: 'game-specific' },
+                { text: 'Community support', value: 'community' }
+            ],
+            next: 'esports-9' 
+        },
+        
+        'esports-9': { 
+            id: 'esports-9', 
+            title: 'What would make you go full-time in esports?', 
+            subtitle: 'Select all that apply',
+            options: [
+                { text: 'Salary/contract offer', value: 'salary' },
+                { text: 'Consistent winnings', value: 'winnings' },
+                { text: 'Top rank', value: 'rank' },
+                { text: 'Pro team tryout', value: 'tryout' },
+                { text: 'Family approval', value: 'family' },
+                { text: 'Finished education', value: 'education' },
+                { text: 'Sponsorship', value: 'sponsorship' }
+            ],
+            next: 'esports-10' 
+        },
+        
         'esports-10': { 
             id: 'esports-10', 
             title: 'If one platform existed, what should it provide?', 
@@ -363,8 +929,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Parent guidance', value: 'parent' },
                 { text: 'Mental/fitness support', value: 'support' }
             ],
-            next: 'esports-11'
+            next: 'esports-11' 
         },
+        
         'esports-11': { 
             id: 'esports-11', 
             title: 'Would you like to pay for such platforms?', 
@@ -374,9 +941,17 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'No', value: 'no' },
                 { text: 'Depends', value: 'depends' }
             ],
-            next: 'esports-12'
+            next: 'esports-12' 
         },
-        'esports-12': { id: 'esports-12', title: 'Primary game', type: 'text-short', next: 'esports-13' },
+        
+        'esports-12': { 
+            id: 'esports-12', 
+            title: 'Primary Game(s)', 
+            subtitle:'List all the Games you have played and are currently Playing',
+            type: 'text',
+            next: 'esports-13' 
+        },
+        
         'esports-13': { 
             id: 'esports-13', 
             title: 'Current level', 
@@ -389,8 +964,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Semi-pro', value: 'semi-pro' },
                 { text: 'Professional', value: 'professional' }
             ],
-            next: 'esports-14'
+            next: 'esports-14' 
         },
+        
         'esports-14': { 
             id: 'esports-14', 
             title: 'What is your serious playing duration?', 
@@ -402,8 +978,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: '2-4 years', value: '2-4' },
                 { text: '4+ years', value: '4+' }
             ],
-            next: 'esports-15'
+            next: 'esports-15' 
         },
+        
         'esports-15': { 
             id: 'esports-15', 
             title: 'Weekly time spent on gaming?', 
@@ -415,8 +992,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: '30-40 hours', value: '30-40' },
                 { text: '40+ hours', value: '40+' }
             ],
-            next: 'esports-16'
+            next: 'esports-16' 
         },
+        
         'esports-16': { 
             id: 'esports-16', 
             title: 'What is your family support level?', 
@@ -427,9 +1005,16 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Neutral', value: 'neutral' },
                 { text: 'Not supportive', value: 'not' }
             ],
-            next: 'esports-17'
+            next: 'esports-17' 
         },
-        'esports-17': { id: 'esports-17', title: 'City', type: 'text-short', next: 'esports-18' },
+        
+        'esports-17': { 
+            id: 'esports-17', 
+            title: 'City', 
+            type: 'text',
+            next: 'esports-18' 
+        },
+        
         'esports-18': { 
             id: 'esports-18', 
             title: 'What is your age group?', 
@@ -441,8 +1026,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: '35-44', value: '35-44' },
                 { text: '45+', value: '45-plus' }
             ],
-            next: 'esports-19'
+            next: 'esports-19' 
         },
+        
         'esports-19': { 
             id: 'esports-19', 
             title: 'What is your gender?', 
@@ -453,8 +1039,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Non-binary', value: 'non-binary' },
                 { text: 'Prefer not to say', value: 'prefer-not' }
             ],
-            next: 'esports-20'
+            next: 'esports-20' 
         },
+        
         'esports-20': { 
             id: 'esports-20', 
             title: 'How do you view esports?', 
@@ -465,9 +1052,23 @@ document.addEventListener('DOMContentLoaded', async function() {
                 { text: 'Exploring', value: 'exploring' },
                 { text: 'Passion', value: 'passion' }
             ],
-            next: 'esports-21'
+            next: 'esports-21' 
         },
-        'esports-21': { id: 'esports-21', title: 'Career or hobby? Why?', type: 'text-long', next: 'thank-you' }
+        
+        'esports-21': { 
+            id: 'esports-21', 
+            title: 'Is esports career or hobby for you?', 
+            type: 'single',
+            options: [
+                { text: 'Career - I\'m actively pursuing', value: 'career-active' },
+                { text: 'Career - But need more time', value: 'career-future' },
+                { text: 'Hobby - Have other career', value: 'hobby-other' },
+                { text: 'Hobby - Focused on studies', value: 'hobby-study' },
+                { text: 'Exploring - Not decided', value: 'exploring' },
+                { text: 'Side income - Part time', value: 'side-income' }
+            ],
+            next: 'thank-you' 
+        }
     };
 
     // ==================== STATE MANAGEMENT ====================
@@ -583,7 +1184,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             localId: 'local_' + state.surveySessionId,
             savedAt: new Date().toISOString()
         });
-        localStorage.setItem('pending_surveys', JSON.stringify(pending.slice(-10))); // Keep last 10
+        localStorage.setItem('pending_surveys', JSON.stringify(pending.slice(-10)));
     }
 
     function showSubmissionStatus(message, type) {
@@ -591,30 +1192,40 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!statusEl) {
             statusEl = document.createElement('div');
             statusEl.className = 'submission-status';
-            elements.thankYouScreen.querySelector('.thank-you-content').appendChild(statusEl);
+            if (elements.thankYouScreen.querySelector('.thank-you-content')) {
+                elements.thankYouScreen.querySelector('.thank-you-content').appendChild(statusEl);
+            }
         }
         
-        statusEl.textContent = message;
-        statusEl.className = `submission-status ${type}`;
-        statusEl.style.display = 'block';
-        
-        if (type === 'success') {
-            setTimeout(() => statusEl.style.display = 'none', 3000);
+        if (statusEl) {
+            statusEl.textContent = message;
+            statusEl.className = `submission-status ${type}`;
+            statusEl.style.display = 'block';
+            
+            if (type === 'success') {
+                setTimeout(() => statusEl.style.display = 'none', 3000);
+            }
         }
     }
 
     // ==================== SURVEY LOGIC ====================
     function init() {
-        elements.startSurveyBtn.addEventListener('click', startSurvey);
-        elements.nextBtn.addEventListener('click', goToNextQuestion);
-        elements.backBtn.addEventListener('click', goToPreviousQuestion);
-        elements.restartBtn.addEventListener('click', restartSurvey);
+        if (elements.startSurveyBtn) {
+            elements.startSurveyBtn.addEventListener('click', startSurvey);
+        }
+        if (elements.nextBtn) {
+            elements.nextBtn.addEventListener('click', goToNextQuestion);
+        }
+        if (elements.backBtn) {
+            elements.backBtn.addEventListener('click', goToPreviousQuestion);
+        }
+        if (elements.restartBtn) {
+            elements.restartBtn.addEventListener('click', restartSurvey);
+        }
         
         document.addEventListener('keydown', handleKeyboardNavigation);
         
-        // Add submission status styles
         addStatusStyles();
-        
         updateProgress();
         createConfetti();
         
@@ -661,13 +1272,15 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function startSurvey() {
-        elements.startSurveyBtn.classList.add('loading');
-        setTimeout(() => {
-            elements.startSurveyBtn.classList.remove('loading');
-            switchScreen('initial');
-            loadQuestion('initial');
-            updateProgress();
-        }, 300);
+        if (elements.startSurveyBtn) {
+            elements.startSurveyBtn.classList.add('loading');
+            setTimeout(() => {
+                elements.startSurveyBtn.classList.remove('loading');
+                switchScreen('initial');
+                loadQuestion('initial');
+                updateProgress();
+            }, 300);
+        }
     }
 
     function loadQuestion(questionId) {
@@ -677,42 +1290,87 @@ document.addEventListener('DOMContentLoaded', async function() {
         state.currentQuestionId = questionId;
         state.currentQuestionNumber++;
         
-        // Update path
-        if (questionId.startsWith('sports')) state.currentPath = 'Sports';
-        else if (questionId.startsWith('esports')) state.currentPath = 'E-Sports';
-        else if (questionId === 'no-reason') state.currentPath = 'Non-Player';
-        
-        // Update UI
-        elements.questionTitle.textContent = question.title;
-        elements.questionSubtitle.textContent = question.subtitle || '';
-        
         // Clear containers
-        elements.optionsContainer.innerHTML = '';
-        elements.inputContainer.innerHTML = '';
-        elements.nextBtn.disabled = true;
+        if (elements.optionsContainer) elements.optionsContainer.innerHTML = '';
+        if (elements.inputContainer) elements.inputContainer.innerHTML = '';
+        if (elements.nextBtn) elements.nextBtn.disabled = true;
         
         // Show/hide back button
-        elements.backBtn.style.display = state.questionHistory.length > 1 ? 'flex' : 'none';
+        if (elements.backBtn) {
+            elements.backBtn.style.display = state.questionHistory.length > 1 ? 'flex' : 'none';
+        }
         
         // Load question type
-        if (question.type === 'single') loadSingleChoice(question);
-        else if (question.type === 'text-long' || question.type === 'text-short') loadTextInput(question);
-        else if (question.type === 'multi') loadMultiChoice(question);
+        if (question.type === 'single') {
+            loadSingleChoice(question);
+        } else if (question.type === 'multi') {
+            loadMultiChoice(question);
+        } else if (question.type === 'conditional') {
+            handleConditionalRouting();
+        }
         
         // Restore answer if exists
-        if (state.answers[questionId]) restoreAnswer(question, questionId);
+        if (state.answers[questionId]) {
+            restoreAnswer(question, questionId);
+        }
+        
+        // Update UI
+        if (elements.questionTitle) {
+            elements.questionTitle.textContent = question.title;
+        }
+        if (elements.questionSubtitle) {
+            elements.questionSubtitle.textContent = question.subtitle || '';
+        }
         
         // Animate
-        elements.questionContainer.style.opacity = '0';
-        requestAnimationFrame(() => {
-            elements.questionContainer.style.opacity = '1';
-            elements.questionContainer.scrollTop = 0;
-        });
+        if (elements.questionContainer) {
+            elements.questionContainer.style.opacity = '0';
+            requestAnimationFrame(() => {
+                elements.questionContainer.style.opacity = '1';
+                elements.questionContainer.scrollTop = 0;
+            });
+        }
         
         state.lastAnswerTime = new Date();
     }
 
+    function handleConditionalRouting() {
+        const initialAnswer = state.answers.initial;
+        if (!initialAnswer) return;
+        
+        const selectedValues = initialAnswer.type === 'multi' ? initialAnswer.values : [initialAnswer.value];
+        let path = '';
+        
+        if (selectedValues.includes('none') || (selectedValues.length === 1 && selectedValues[0] === 'none')) {
+            path = 'none';
+        } else if (selectedValues.includes('sports') && selectedValues.includes('esports')) {
+            path = 'combined';
+        } else if (selectedValues.includes('sports')) {
+            path = 'sports-only';
+        } else if (selectedValues.includes('esports')) {
+            path = 'esports-only';
+        }
+        
+        // Update path for analytics
+        if (path === 'combined') state.currentPath = 'Combined';
+        else if (path === 'sports-only') state.currentPath = 'Sports';
+        else if (path === 'esports-only') state.currentPath = 'E-Sports';
+        else if (path === 'none') state.currentPath = 'Non-Player';
+        
+        // Auto-advance to next question
+        setTimeout(() => {
+            const nextId = surveyData['path-selector'].next[path];
+            if (nextId) {
+                state.questionHistory.push('path-selector');
+                updateProgress();
+                loadQuestion(nextId);
+            }
+        }, 500);
+    }
+
     function loadSingleChoice(question) {
+        if (!elements.optionsContainer) return;
+        
         question.options.forEach((option, index) => {
             const button = document.createElement('button');
             button.className = 'option-btn';
@@ -743,7 +1401,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         button.classList.add('selected');
         button.setAttribute('aria-checked', 'true');
-        elements.nextBtn.disabled = false;
+        if (elements.nextBtn) elements.nextBtn.disabled = false;
         
         state.answers[state.currentQuestionId] = {
             type: 'single',
@@ -756,6 +1414,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function loadMultiChoice(question) {
+        if (!elements.optionsContainer) return;
+        
         question.options.forEach(option => {
             const button = document.createElement('button');
             button.className = 'option-btn multi-select';
@@ -773,7 +1433,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             elements.optionsContainer.appendChild(button);
         });
         
-        elements.nextBtn.disabled = true;
+        if (elements.nextBtn) elements.nextBtn.disabled = true;
     }
 
     function updateMultiSelect() {
@@ -781,41 +1441,44 @@ document.addEventListener('DOMContentLoaded', async function() {
         const values = Array.from(selected).map(btn => btn.dataset.value);
         const texts = Array.from(selected).map(btn => btn.querySelector('.option-text').textContent);
         
-        state.answers[state.currentQuestionId] = {
-            type: 'multi',
-            values,
-            texts
-        };
-        
-        elements.nextBtn.disabled = values.length === 0;
-    }
-
-    function loadTextInput(question) {
-        const isShort = question.type === 'text-short';
-        const textarea = document.createElement('textarea');
-        textarea.className = `text-input ${isShort ? 'short' : ''}`;
-        textarea.placeholder = 'Type your answer here...';
-        textarea.rows = isShort ? 3 : 6;
-        
-        const validateInput = debounce(() => {
-            const value = textarea.value.replace(/[^\w\s.,!?@#%&*()\-:\n\r]/g, '');
-            if (textarea.value !== value) textarea.value = value;
-            
-            const isValid = textarea.value.trim().length > 0;
-            elements.nextBtn.disabled = !isValid;
-            
-            if (isValid) {
+        // Special handling for initial question - "None" should deselect others
+        if (state.currentQuestionId === 'initial') {
+            const noneSelected = Array.from(selected).some(btn => btn.dataset.value === 'none');
+            if (noneSelected) {
+                // Remove all other selections
+                document.querySelectorAll('.option-btn.multi-select').forEach(btn => {
+                    if (btn.dataset.value !== 'none') {
+                        btn.classList.remove('selected');
+                    }
+                });
+                // Update values again
+                const updatedSelected = document.querySelectorAll('.option-btn.multi-select.selected');
+                const updatedValues = Array.from(updatedSelected).map(btn => btn.dataset.value);
+                const updatedTexts = Array.from(updatedSelected).map(btn => btn.querySelector('.option-text').textContent);
+                
                 state.answers[state.currentQuestionId] = {
-                    type: 'text',
-                    value: textarea.value.trim()
+                    type: 'multi',
+                    values: updatedValues,
+                    texts: updatedTexts
+                };
+            } else {
+                state.answers[state.currentQuestionId] = {
+                    type: 'multi',
+                    values,
+                    texts
                 };
             }
-        }, 300);
+        } else {
+            state.answers[state.currentQuestionId] = {
+                type: 'multi',
+                values,
+                texts
+            };
+        }
         
-        textarea.addEventListener('input', validateInput);
-        setTimeout(() => textarea.focus(), 100);
-        
-        elements.inputContainer.appendChild(textarea);
+        if (elements.nextBtn) {
+            elements.nextBtn.disabled = values.length === 0;
+        }
     }
 
     function restoreAnswer(question, questionId) {
@@ -827,19 +1490,17 @@ document.addEventListener('DOMContentLoaded', async function() {
             if (button) {
                 button.classList.add('selected');
                 button.setAttribute('aria-checked', 'true');
-                elements.nextBtn.disabled = false;
+                if (elements.nextBtn) elements.nextBtn.disabled = false;
             }
         } else if (question.type === 'multi') {
-            answer.values.forEach(value => {
-                const button = document.querySelector(`.option-btn[data-value="${value}"]`);
-                if (button) button.classList.add('selected');
-            });
-            elements.nextBtn.disabled = answer.values.length === 0;
-        } else if (question.type.includes('text')) {
-            const textarea = document.querySelector('.text-input');
-            if (textarea && answer.value) {
-                textarea.value = answer.value;
-                elements.nextBtn.disabled = false;
+            if (answer.values && Array.isArray(answer.values)) {
+                answer.values.forEach(value => {
+                    const button = document.querySelector(`.option-btn[data-value="${value}"]`);
+                    if (button) button.classList.add('selected');
+                });
+            }
+            if (elements.nextBtn) {
+                elements.nextBtn.disabled = !answer.values || answer.values.length === 0;
             }
         }
     }
@@ -851,7 +1512,20 @@ document.addEventListener('DOMContentLoaded', async function() {
         let nextId;
         if (typeof question.next === 'object') {
             const answer = state.answers[state.currentQuestionId];
-            nextId = answer ? question.next[answer.value] : Object.values(question.next)[0];
+            if (answer) {
+                if (answer.type === 'multi') {
+                    // For combined path determination
+                    if (state.currentQuestionId === 'initial') {
+                        nextId = 'path-selector';
+                    } else {
+                        nextId = question.next[answer.value] || Object.values(question.next)[0];
+                    }
+                } else {
+                    nextId = question.next[answer.value];
+                }
+            } else {
+                nextId = Object.values(question.next)[0];
+            }
         } else {
             nextId = question.next;
         }
@@ -862,8 +1536,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (nextId === 'thank-you') {
             await showThankYouScreen();
         } else if (surveyData[nextId]) {
-            elements.questionContainer.style.opacity = '0';
-            setTimeout(() => loadQuestion(nextId), 200);
+            if (elements.questionContainer) {
+                elements.questionContainer.style.opacity = '0';
+                setTimeout(() => loadQuestion(nextId), 200);
+            }
         }
     }
 
@@ -878,8 +1554,10 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (prevId === 'welcome') {
             switchScreen('welcome');
         } else {
-            elements.questionContainer.style.opacity = '0';
-            setTimeout(() => loadQuestion(prevId), 200);
+            if (elements.questionContainer) {
+                elements.questionContainer.style.opacity = '0';
+                setTimeout(() => loadQuestion(prevId), 200);
+            }
         }
         
         updateProgress();
@@ -887,21 +1565,29 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     async function showThankYouScreen() {
         // Update completion UI
-        elements.completionPercent.textContent = '100%';
-        const circumference = 2 * Math.PI * 52;
-        elements.progressRingCircle.style.strokeDashoffset = 0;
+        if (elements.completionPercent) {
+            elements.completionPercent.textContent = '100%';
+        }
+        if (elements.progressRingCircle) {
+            const circumference = 2 * Math.PI * 52;
+            elements.progressRingCircle.style.strokeDashoffset = 0;
+        }
         
         // Set thank you message
         const messages = {
             'Sports': "Thank you for sharing your sports journey!",
             'E-Sports': "Thank you for sharing your esports experience!",
+            'Combined': "Thank you for sharing your experience in both sports and esports!",
             'Non-Player': "Thank you for sharing your perspective!"
         };
         
         const message = messages[state.currentPath] || "Thank you for your feedback!";
-        document.querySelector('.completion-message').textContent = message;
+        const completionMessageEl = document.querySelector('.completion-message');
+        if (completionMessageEl) {
+            completionMessageEl.textContent = message;
+        }
         
-        // Save to Firebase (without showing reference ID)
+        // Save to Firebase
         await saveSurveyToFirebase();
         
         // Celebrate
@@ -909,9 +1595,15 @@ document.addEventListener('DOMContentLoaded', async function() {
         switchScreen('thank-you');
         
         // Update progress bar
-        elements.progressFill.style.width = '100%';
-        elements.progressPercent.textContent = '100%';
-        elements.progressMessage.textContent = 'Complete!';
+        if (elements.progressFill) {
+            elements.progressFill.style.width = '100%';
+        }
+        if (elements.progressPercent) {
+            elements.progressPercent.textContent = '100%';
+        }
+        if (elements.progressMessage) {
+            elements.progressMessage.textContent = 'Complete!';
+        }
         
         console.log('Survey completed:', state.answers);
     }
@@ -921,37 +1613,55 @@ document.addEventListener('DOMContentLoaded', async function() {
         let completed = state.questionHistory.length - 1;
         
         if (state.currentPath === 'Sports') totalInPath = 20;
-        else if (state.currentPath === 'E-Sports') totalInPath = 24;
+        else if (state.currentPath === 'E-Sports') totalInPath = 22;
+        else if (state.currentPath === 'Combined') totalInPath = 24;
         else if (state.currentPath === 'Non-Player') totalInPath = 2;
         
-        if (state.currentQuestionId === 'initial' || state.currentQuestionId === 'player-type') {
+        // Account for initial questions
+        if (state.currentQuestionId === 'initial' || state.currentQuestionId === 'path-selector') {
             totalInPath = 3;
         }
         
         const percentage = Math.min(Math.round((completed / totalInPath) * 100), 100);
         
-        elements.progressFill.style.width = `${percentage}%`;
-        elements.progressPercent.textContent = `${percentage}%`;
+        if (elements.progressFill) {
+            elements.progressFill.style.width = `${percentage}%`;
+        }
+        if (elements.progressPercent) {
+            elements.progressPercent.textContent = `${percentage}%`;
+        }
         
         const messages = [
             "Starting...", "Moving ahead!", "Great progress!", "Halfway there!", 
             "Almost done!", "Final stretch!", "Complete!"
         ];
         const msgIndex = Math.min(Math.floor(percentage / 15), messages.length - 1);
-        elements.progressMessage.textContent = messages[msgIndex] || "Almost there!";
+        if (elements.progressMessage) {
+            elements.progressMessage.textContent = messages[msgIndex] || "Almost there!";
+        }
         
-        elements.progressFill.style.transform = 'scaleY(1.2)';
-        setTimeout(() => elements.progressFill.style.transform = '', 300);
+        if (elements.progressFill) {
+            elements.progressFill.style.transform = 'scaleY(1.2)';
+            setTimeout(() => {
+                if (elements.progressFill) {
+                    elements.progressFill.style.transform = '';
+                }
+            }, 300);
+        }
     }
 
     function switchScreen(screenName) {
-        elements.welcomeScreen.classList.remove('active');
-        elements.questionContainer.classList.remove('active');
-        elements.thankYouScreen.classList.remove('active');
+        if (elements.welcomeScreen) elements.welcomeScreen.classList.remove('active');
+        if (elements.questionContainer) elements.questionContainer.classList.remove('active');
+        if (elements.thankYouScreen) elements.thankYouScreen.classList.remove('active');
         
-        if (screenName === 'welcome') elements.welcomeScreen.classList.add('active');
-        else if (screenName === 'thank-you') elements.thankYouScreen.classList.add('active');
-        else elements.questionContainer.classList.add('active');
+        if (screenName === 'welcome' && elements.welcomeScreen) {
+            elements.welcomeScreen.classList.add('active');
+        } else if (screenName === 'thank-you' && elements.thankYouScreen) {
+            elements.thankYouScreen.classList.add('active');
+        } else if (elements.questionContainer) {
+            elements.questionContainer.classList.add('active');
+        }
     }
 
     function restartSurvey() {
@@ -968,12 +1678,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 
     function handleKeyboardNavigation(e) {
-        if (!elements.questionContainer.classList.contains('active')) return;
+        if (!elements.questionContainer || !elements.questionContainer.classList.contains('active')) return;
         
-        const question = surveyData[state.currentQuestionId];
-        if (!question) return;
-        
-        if (e.key === 'Enter' && !elements.nextBtn.disabled) {
+        if (e.key === 'Enter' && elements.nextBtn && !elements.nextBtn.disabled) {
             goToNextQuestion();
         } else if (e.key === 'Escape') {
             goToPreviousQuestion();
