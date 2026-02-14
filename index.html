@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>SkillBridge | Athletes & Gamers Experience Survey</title>
     
     <!-- Preload critical resources -->
@@ -19,26 +19,72 @@
     <!-- Meta tags for better mobile experience -->
     <meta name="description" content="Shape the future of Sports and Esports with SkillBridge. Share your journey as an athlete or gamer through our premium survey experience.">
     <meta name="theme-color" content="#8a2be2">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     
     <!-- Favicon (add these files to your project) -->
-    <!-- <link rel="icon" type="image/png" href="/favicon.png"> -->
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮⚽</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮⚽</text></svg>">
     
     <style>
         /* Critical CSS to prevent layout shift */
         .screen { display: none; }
-        .screen.active { display: flex; }
+        .screen.active { display: flex !important; }
         .progress-fill { width: 0%; }
-        body { opacity: 1; transition: opacity 0.3s ease; }
+        body { opacity: 1; transition: opacity 0.3s ease; margin: 0; padding: 0; }
+        
+        /* Ensure question container displays properly */
+        #question-container.active {
+            display: flex !important;
+            flex-direction: column;
+        }
+        
+        /* Ensure text is visible */
+        .question-title, .question-subtitle {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            color: white !important;
+        }
+        
+        /* Options container visibility */
+        .options-container {
+            display: grid !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* Loading state */
+        .btn-primary.loading {
+            position: relative;
+            color: transparent !important;
+            pointer-events: none;
+        }
+        .btn-primary.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-    <!-- Animated Background (NEW) -->
+    <!-- Animated Background -->
     <div class="animated-bg"></div>
     <div class="grid-lines"></div>
     <div class="floating-particles" id="particles"></div>
 
     <div class="container">
-        <!-- Progress Bar - UPDATED with proper structure -->
+        <!-- Progress Bar -->
         <div class="progress-container">
             <div class="progress-bar">
                 <div class="progress-fill" style="width: 0%;"></div>
@@ -55,15 +101,13 @@
             <div class="screen active" id="welcome-screen">
                 <div class="welcome-content">
                     <div class="logo">
-                        <span class="logo-icon">🎮⚽</span> <!-- UPDATED: Dual icons -->
+                        <span class="logo-icon">🎮⚽</span>
                         <h1 class="logo-text">SkillBridge</h1>
                     </div>
                     <h2 class="welcome-title">Shape the Future of Sports & Esports</h2>
                     <p class="welcome-subtitle">Help us build a better platform for Athletes and Gamers. Share your journey through this immersive, premium experience.</p>
                     
-                    <!-- Path indicator removed from here - only shown during survey -->
-                    
-                    <button class="btn-primary start-survey-btn" id="start-survey-btn">
+                    <button class="btn-primary" id="start-survey-btn">
                         Begin Experience
                         <i class="fas fa-arrow-right"></i>
                     </button>
@@ -79,11 +123,11 @@
                         </div>
                         <div class="feature">
                             <i class="fas fa-trophy"></i>
-                            <span>Multiple Paths Available</span> <!-- UPDATED text -->
+                            <span>Multiple Paths Available</span>
                         </div>
                     </div>
                     
-                    <!-- Offline status indicator (NEW) -->
+                    <!-- Offline status indicator -->
                     <div class="offline-indicator" id="offline-indicator" style="display: none;">
                         <i class="fas fa-wifi-slash"></i>
                         <span>Working offline - data will sync when connected</span>
@@ -91,31 +135,27 @@
                 </div>
             </div>
 
-            <!-- Question Screens - UPDATED structure -->
+            <!-- Question Screen -->
             <div class="screen" id="question-container">
-                <!-- Path indicator (NEW) -->
+                <!-- Path indicator -->
                 <div class="path-indicator" id="path-indicator" style="display: none;">
                     <i class="fas fa-route"></i>
                     <span id="path-name"></span>
                 </div>
                 
                 <div class="question-header">
-                    <h2 class="question-title" id="question-title"></h2>
+                    <h2 class="question-title" id="question-title">Loading question...</h2>
                     <p class="question-subtitle" id="question-subtitle"></p>
-                    
-                    <!-- Question counter (NEW) -->
-                    <div class="question-counter" id="question-counter" style="display: none;">
-                        <span class="current" id="current-question">0</span>
-                        <span class="total">/</span>
-                        <span class="total" id="total-questions">0</span>
-                    </div>
                 </div>
                 
                 <div class="options-container" id="options-container">
                     <!-- Options will be dynamically inserted here -->
                 </div>
                 
-                <!-- REMOVED: input-container - not needed for MCQ-only survey -->
+                <!-- Input container for text questions -->
+                <div class="input-container" id="input-container" style="display: none;">
+                    <!-- Text input will be dynamically inserted here -->
+                </div>
                 
                 <div class="navigation">
                     <button class="btn-secondary" id="back-btn" style="display: none;">
@@ -128,7 +168,7 @@
                     </button>
                 </div>
                 
-                <!-- Loading indicator for async operations (NEW) -->
+                <!-- Loading indicator -->
                 <div class="loading-dots" id="loading-indicator" style="display: none;">
                     <span></span>
                     <span></span>
@@ -136,7 +176,7 @@
                 </div>
             </div>
 
-            <!-- Thank You Screen - ENHANCED -->
+            <!-- Thank You Screen -->
             <div class="screen" id="thank-you-screen">
                 <div class="thank-you-content">
                     <div class="celebration-animation" id="celebration-animation">
@@ -152,7 +192,7 @@
                     
                     <div class="completion-stats">
                         <div class="completion-circle">
-                            <svg class="progress-ring" width="160" height="160" viewBox="0 0 120 120"> <!-- UPDATED size -->
+                            <svg class="progress-ring" width="160" height="160" viewBox="0 0 120 120">
                                 <circle class="progress-ring-circle" 
                                         stroke="#8a2be2" 
                                         stroke-width="8" 
@@ -160,7 +200,7 @@
                                         r="52" 
                                         cx="60" 
                                         cy="60"
-                                        style="stroke-dasharray: 326.726; stroke-dashoffset: 326.726;"/>
+                                        style="stroke-dasharray: 326.726; stroke-dashoffset: 326.726; transition: stroke-dashoffset 1s ease;"/>
                             </svg>
                             <span class="completion-percent">100%</span>
                         </div>
@@ -173,19 +213,15 @@
                         <p>Thank you for sharing your experience with us. Your journey matters, and your feedback will directly influence how we build SkillBridge to better serve athletes and gamers like you.</p>
                     </div>
                     
-                    <!-- Submission status (NEW) -->
+                    <!-- Submission status -->
                     <div class="submission-status" id="submission-status" style="display: none;"></div>
                     
-                    <!-- Restart button (NEW) -->
-                    <button class="btn-secondary" id="restart-btn" style="margin-top: 30px;">
-                        <i class="fas fa-redo-alt"></i>
-                        Take Another Survey
-                    </button>
+                    <!-- Restart button -->
                 </div>
             </div>
         </div>
 
-        <!-- Background Elements - ENHANCED -->
+        <!-- Background Elements -->
         <div class="background-elements">
             <div class="gradient-sphere sphere-1"></div>
             <div class="gradient-sphere sphere-2"></div>
@@ -195,39 +231,80 @@
 
     <!-- Load Firebase modules with module type -->
     <script type="module">
-        // Import Firebase modules first
-        import firebaseService from './firebase-app.js';
-        window.firebaseService = firebaseService;
-        console.log('Firebase module loaded');
+        // Import Firebase modules first with error handling
+        try {
+            const module = await import('./firebase-app.js');
+            window.firebaseService = module.default || module;
+            console.log('✅ Firebase module loaded successfully');
+        } catch (error) {
+            console.warn('⚠️ Firebase module failed to load:', error);
+            // Create a fallback service
+            window.firebaseService = {
+                async saveSurvey(surveyData) {
+                    console.log('📝 Fallback: Survey data saved to localStorage', surveyData);
+                    const stored = JSON.parse(localStorage.getItem('survey_backup') || '[]');
+                    stored.push({
+                        ...surveyData,
+                        id: 'local_' + Date.now(),
+                        savedAt: new Date().toISOString()
+                    });
+                    localStorage.setItem('survey_backup', JSON.stringify(stored.slice(-20)));
+                    return { success: true, id: 'local_' + Date.now() };
+                },
+                async updateAnalytics() {
+                    return { success: true };
+                }
+            };
+        }
     </script>
     
     <!-- Load survey script after Firebase -->
     <script type="module" src="script.js"></script>
     
-    <!-- Register service worker for offline support (OPTIONAL) -->
+    <!-- Register service worker for offline support (optional) -->
     <script>
-        if ('serviceWorker' in navigator) {
+        // Service worker registration (optional)
+        if ('serviceWorker' in navigator && location.protocol === 'https:') {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js').catch(err => {
-                    console.log('Service worker registration skipped:', err);
+                    console.log('Service worker registration skipped:', err.message);
                 });
             });
         }
         
         // Detect offline/online status
-        window.addEventListener('online', updateOnlineStatus);
-        window.addEventListener('offline', updateOnlineStatus);
-        
         function updateOnlineStatus() {
             const indicator = document.getElementById('offline-indicator');
             if (indicator) {
                 if (navigator.onLine) {
                     indicator.style.display = 'none';
+                    // Try to sync pending data when coming online
+                    if (window.firebaseService && typeof window.firebaseService.retryPendingOperations === 'function') {
+                        window.firebaseService.retryPendingOperations().catch(console.warn);
+                    }
                 } else {
                     indicator.style.display = 'flex';
                 }
             }
         }
+        
+        window.addEventListener('online', updateOnlineStatus);
+        window.addEventListener('offline', updateOnlineStatus);
+        
+        // Initial check
+        document.addEventListener('DOMContentLoaded', updateOnlineStatus);
+        
+        // Prevent zoom on double tap for better mobile experience
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+        
+        // Add error handling for images
+        window.addEventListener('error', (e) => {
+            if (e.target.tagName === 'IMG') {
+                console.warn('Image failed to load:', e.target.src);
+            }
+        }, true);
     </script>
 </body>
 </html>

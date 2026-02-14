@@ -2,7 +2,6 @@
 document.addEventListener('DOMContentLoaded', async function() {
     // ==================== FIREBASE IMPORT & SETUP ====================
     let firebaseService = null;
-    let firebaseAvailable = false;
     
     try {
         // Import Firebase services
@@ -71,25 +70,30 @@ document.addEventListener('DOMContentLoaded', async function() {
                     });
                     return { success: true };
                 } catch (error) {
-                    await setDoc(doc(db, 'survey_analytics', 'completions'), {
-                        total_completions: 1,
-                        sports_completions: path === 'Sports' ? 1 : 0,
-                        esports_completions: path === 'E-Sports' ? 1 : 0,
-                        combined_completions: path === 'Combined' ? 1 : 0,
-                        nonplayer_completions: path === 'Non-Player' ? 1 : 0,
-                        last_completed: serverTimestamp(),
-                        createdAt: serverTimestamp()
-                    });
-                    return { success: true };
+                    // Create analytics doc if it doesn't exist
+                    try {
+                        await setDoc(doc(db, 'survey_analytics', 'completions'), {
+                            total_completions: 1,
+                            sports_completions: path === 'Sports' ? 1 : 0,
+                            esports_completions: path === 'E-Sports' ? 1 : 0,
+                            combined_completions: path === 'Combined' ? 1 : 0,
+                            nonplayer_completions: path === 'Non-Player' ? 1 : 0,
+                            last_completed: serverTimestamp(),
+                            createdAt: serverTimestamp()
+                        });
+                        return { success: true };
+                    } catch (createError) {
+                        console.error('Error creating analytics:', createError);
+                        return { success: false, error: createError.message };
+                    }
                 }
             }
         };
         
-        firebaseAvailable = true;
-        console.log('Firebase initialized successfully');
+        console.log('✅ Firebase initialized successfully');
         
     } catch (error) {
-        console.warn('Firebase not available, using local storage:', error);
+        console.warn('⚠️ Firebase not available, using local storage:', error);
         firebaseService = {
             async saveSurvey(surveyData) {
                 const stored = JSON.parse(localStorage.getItem('survey_backup') || '[]');
@@ -98,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                     id: 'local_' + Date.now(),
                     savedAt: new Date().toISOString()
                 });
-                localStorage.setItem('survey_backup', JSON.stringify(stored));
+                localStorage.setItem('survey_backup', JSON.stringify(stored.slice(-20)));
                 return { success: true, id: 'local_' + Date.now() };
             },
             async updateAnalytics() {
@@ -1100,8 +1104,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         answers: {},
         questionHistory: ['welcome'],
         currentPath: '',
-        totalQuestions: 1,
-        currentQuestionNumber: 0,
         surveySessionId: generateSessionId(),
         userStartedAt: new Date(),
         lastAnswerTime: null
@@ -1112,7 +1114,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         welcomeScreen: document.getElementById('welcome-screen'),
         questionContainer: document.getElementById('question-container'),
         thankYouScreen: document.getElementById('thank-you-screen'),
-        startSurveyBtn: document.querySelector('.start-survey-btn'),
+        startSurveyBtn: document.querySelector('.start-survey-btn') || document.getElementById('start-survey-btn'),
         nextBtn: document.getElementById('next-btn'),
         backBtn: document.getElementById('back-btn'),
         restartBtn: document.getElementById('restart-btn'),
@@ -1133,6 +1135,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         submissionStatus: document.getElementById('submission-status'),
         offlineIndicator: document.getElementById('offline-indicator')
     };
+
+    // Check if critical elements exist
+    if (!elements.startSurveyBtn) console.error('Start button not found!');
+    if (!elements.nextBtn) console.error('Next button not found!');
+    if (!elements.optionsContainer) console.error('Options container not found!');
 
     // ==================== UTILITY FUNCTIONS ====================
     function generateSessionId() {
@@ -1248,16 +1255,22 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // ==================== SURVEY LOGIC ====================
     function init() {
+        console.log('Initializing survey...');
+        
         // Add event listeners
         if (elements.startSurveyBtn) {
             elements.startSurveyBtn.addEventListener('click', startSurvey);
+            console.log('Start button listener added');
         }
+        
         if (elements.nextBtn) {
             elements.nextBtn.addEventListener('click', goToNextQuestion);
         }
+        
         if (elements.backBtn) {
             elements.backBtn.addEventListener('click', goToPreviousQuestion);
         }
+        
         if (elements.restartBtn) {
             elements.restartBtn.addEventListener('click', restartSurvey);
         }
@@ -1318,11 +1331,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                     color: #d97706;
                     border: 1px solid rgba(251, 191, 36, 0.3);
                 }
-                .submission-status.error {
-                    background: rgba(239, 68, 68, 0.15);
-                    color: #dc2626;
-                    border: 1px solid rgba(239, 68, 68, 0.3);
-                }
                 .offline-indicator {
                     display: flex;
                     align-items: center;
@@ -1336,29 +1344,74 @@ document.addEventListener('DOMContentLoaded', async function() {
                     backdrop-filter: blur(10px);
                     font-size: 14px;
                 }
+                .text-input {
+                    width: 100%;
+                    padding: 16px;
+                    background: rgba(20, 20, 30, 0.8);
+                    border: 2px solid rgba(138, 43, 226, 0.3);
+                    border-radius: 12px;
+                    color: white;
+                    font-size: 16px;
+                    font-family: 'Inter', sans-serif;
+                    resize: vertical;
+                    margin-bottom: 10px;
+                }
+                .text-input:focus {
+                    outline: none;
+                    border-color: #00d4ff;
+                    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+                }
+                .text-input.short {
+                    min-height: 60px;
+                }
+                .character-counter {
+                    text-align: right;
+                    font-size: 12px;
+                    color: #8b9cf0;
+                    margin-top: 5px;
+                }
             `;
             document.head.appendChild(style);
         }
     }
 
+    // FIXED: Simplified startSurvey function
     function startSurvey() {
+        console.log('Start survey clicked');
         if (elements.startSurveyBtn) {
             elements.startSurveyBtn.classList.add('loading');
             setTimeout(() => {
                 elements.startSurveyBtn.classList.remove('loading');
-                switchScreen('initial');
-                loadQuestion('initial');
-                updateProgress();
+                // Directly show question container and load initial question
+                showQuestionScreen('initial');
             }, 300);
         }
     }
 
+    // NEW: Helper function to show question screen and load a question
+    function showQuestionScreen(questionId) {
+        // Hide welcome and thank you screens
+        if (elements.welcomeScreen) elements.welcomeScreen.classList.remove('active');
+        if (elements.thankYouScreen) elements.thankYouScreen.classList.remove('active');
+        
+        // Show question container
+        if (elements.questionContainer) {
+            elements.questionContainer.classList.add('active');
+        }
+        
+        // Load the question
+        loadQuestion(questionId);
+    }
+
     function loadQuestion(questionId) {
+        console.log('Loading question:', questionId);
         const question = surveyData[questionId];
-        if (!question) return;
+        if (!question) {
+            console.error('Question not found:', questionId);
+            return;
+        }
         
         state.currentQuestionId = questionId;
-        state.currentQuestionNumber = state.questionHistory.length;
         
         // Update path indicator
         updatePathIndicator();
@@ -1382,6 +1435,16 @@ document.addEventListener('DOMContentLoaded', async function() {
             elements.backBtn.style.display = state.questionHistory.length > 1 ? 'flex' : 'none';
         }
         
+        // Update UI - Set title and subtitle
+        if (elements.questionTitle) {
+            elements.questionTitle.textContent = question.title;
+            console.log('Title set to:', question.title);
+        }
+        if (elements.questionSubtitle) {
+            elements.questionSubtitle.textContent = question.subtitle || '';
+            console.log('Subtitle set to:', question.subtitle);
+        }
+        
         // Load question based on type
         if (question.type === 'single' || question.type === 'multi') {
             // MCQ Questions
@@ -1400,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             loadTextInput(question);
         } else if (question.type === 'conditional') {
             handleConditionalRouting();
-            return; // Don't proceed with UI updates yet
+            return;
         }
         
         // Restore answer if exists
@@ -1408,21 +1471,10 @@ document.addEventListener('DOMContentLoaded', async function() {
             restoreAnswer(question, questionId);
         }
         
-        // Update UI
-        if (elements.questionTitle) {
-            elements.questionTitle.textContent = question.title;
-        }
-        if (elements.questionSubtitle) {
-            elements.questionSubtitle.textContent = question.subtitle || '';
-        }
-        
-        // Animate transition
+        // Force a reflow to ensure visibility
         if (elements.questionContainer) {
-            elements.questionContainer.style.opacity = '0';
-            requestAnimationFrame(() => {
-                elements.questionContainer.style.opacity = '1';
-                elements.questionContainer.scrollTop = 0;
-            });
+            elements.questionContainer.style.display = 'flex';
+            elements.questionContainer.style.opacity = '1';
         }
         
         state.lastAnswerTime = new Date();
@@ -1479,7 +1531,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     function loadSingleChoice(question) {
         if (!elements.optionsContainer) return;
         
-        question.options.forEach((option, index) => {
+        question.options.forEach((option) => {
             const button = document.createElement('button');
             button.className = 'option-btn';
             button.innerHTML = `
@@ -1487,15 +1539,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                 <span class="check-icon"><i class="fas fa-check"></i></span>
             `;
             button.dataset.value = option.value;
-            button.dataset.index = index;
             
             button.addEventListener('click', () => selectOption(button, option));
-            button.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    selectOption(button, option);
-                }
-            });
             
             elements.optionsContainer.appendChild(button);
         });
@@ -1516,9 +1561,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             value: option.value,
             text: option.text
         };
-        
-        button.style.transform = 'scale(0.98)';
-        setTimeout(() => button.style.transform = '', 150);
     }
 
     function loadMultiChoice(question) {
@@ -1599,54 +1641,42 @@ document.addEventListener('DOMContentLoaded', async function() {
         textarea.placeholder = question.placeholder || 'Type your answer here...';
         textarea.rows = isShort ? 2 : 4;
         
+        elements.inputContainer.appendChild(textarea);
+        
         // Add character counter for long text
         if (!isShort) {
             const counter = document.createElement('div');
             counter.className = 'character-counter';
             counter.textContent = '0 characters';
             elements.inputContainer.appendChild(counter);
-        }
-        
-        // Debounced validation
-        const validateInput = debounce(() => {
-            // Sanitize input
-            let value = textarea.value;
             
-            // Basic sanitization - remove excessive special chars but keep meaningful ones
-            if (question.type === 'text-short') {
-                value = value.replace(/[^\w\s.,!?@#&()-]/g, '');
-            }
-            
-            if (textarea.value !== value) textarea.value = value;
-            
-            const isValid = value.trim().length > 0;
-            
-            if (elements.nextBtn) {
-                elements.nextBtn.disabled = !isValid;
-            }
-            
-            if (isValid) {
-                state.answers[state.currentQuestionId] = {
-                    type: 'text',
-                    value: value.trim(),
-                    questionType: question.type
-                };
-            }
-            
-            // Update character counter
-            const counter = elements.inputContainer.querySelector('.character-counter');
-            if (counter) {
-                const length = value.trim().length;
+            // Update counter on input
+            textarea.addEventListener('input', () => {
+                const length = textarea.value.trim().length;
                 counter.textContent = `${length} character${length !== 1 ? 's' : ''}`;
-            }
-        }, 300);
-        
-        textarea.addEventListener('input', validateInput);
+                validateTextInput(textarea);
+            });
+        } else {
+            textarea.addEventListener('input', () => validateTextInput(textarea));
+        }
         
         // Focus after a short delay
         setTimeout(() => textarea.focus(), 150);
+    }
+
+    function validateTextInput(textarea) {
+        const isValid = textarea.value.trim().length > 0;
         
-        elements.inputContainer.appendChild(textarea);
+        if (elements.nextBtn) {
+            elements.nextBtn.disabled = !isValid;
+        }
+        
+        if (isValid) {
+            state.answers[state.currentQuestionId] = {
+                type: 'text',
+                value: textarea.value.trim()
+            };
+        }
     }
 
     function restoreAnswer(question, questionId) {
@@ -1761,7 +1791,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         const prevId = state.questionHistory[state.questionHistory.length - 1];
         
         if (prevId === 'welcome') {
-            switchScreen('welcome');
+            showWelcomeScreen();
         } else {
             if (elements.questionContainer) {
                 elements.questionContainer.style.opacity = '0';
@@ -1772,13 +1802,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         updateProgress();
     }
 
+    function showWelcomeScreen() {
+        if (elements.welcomeScreen) elements.welcomeScreen.classList.add('active');
+        if (elements.questionContainer) elements.questionContainer.classList.remove('active');
+        if (elements.thankYouScreen) elements.thankYouScreen.classList.remove('active');
+    }
+
     async function showThankYouScreen() {
         // Update completion UI
         if (elements.completionPercent) {
             elements.completionPercent.textContent = '100%';
         }
         if (elements.progressRingCircle) {
-            const circumference = 2 * Math.PI * 52;
             elements.progressRingCircle.style.strokeDashoffset = '0';
         }
         
@@ -1801,7 +1836,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         
         // Celebrate
         triggerConfetti();
-        switchScreen('thank-you');
+        
+        // Show thank you screen
+        if (elements.welcomeScreen) elements.welcomeScreen.classList.remove('active');
+        if (elements.questionContainer) elements.questionContainer.classList.remove('active');
+        if (elements.thankYouScreen) elements.thankYouScreen.classList.add('active');
         
         // Update progress bar
         if (elements.progressFill) {
@@ -1847,31 +1886,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (elements.progressMessage) {
             elements.progressMessage.textContent = messages[msgIndex] || "Almost there!";
         }
-        
-        // Subtle animation
-        if (elements.progressFill) {
-            elements.progressFill.style.transform = 'scaleY(1.2)';
-            setTimeout(() => {
-                if (elements.progressFill) {
-                    elements.progressFill.style.transform = '';
-                }
-            }, 300);
-        }
     }
 
-    function switchScreen(screenName) {
-        if (elements.welcomeScreen) elements.welcomeScreen.classList.remove('active');
-        if (elements.questionContainer) elements.questionContainer.classList.remove('active');
-        if (elements.thankYouScreen) elements.thankYouScreen.classList.remove('active');
-        
-        if (screenName === 'welcome' && elements.welcomeScreen) {
-            elements.welcomeScreen.classList.add('active');
-        } else if (screenName === 'thank-you' && elements.thankYouScreen) {
-            elements.thankYouScreen.classList.add('active');
-        } else if (elements.questionContainer) {
-            elements.questionContainer.classList.add('active');
-        }
-    }
+    // REMOVED: switchScreen function - replaced with more specific functions
 
     function restartSurvey() {
         // Reset state
@@ -1879,12 +1896,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         state.answers = {};
         state.questionHistory = ['welcome'];
         state.currentPath = '';
-        state.currentQuestionNumber = 0;
         state.surveySessionId = generateSessionId();
         state.userStartedAt = new Date();
         
-        // Reset UI
-        switchScreen('welcome');
+        // Show welcome screen
+        showWelcomeScreen();
         updateProgress();
         
         // Hide path indicator
@@ -1903,14 +1919,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     function handleKeyboardNavigation(e) {
         if (!elements.questionContainer || !elements.questionContainer.classList.contains('active')) return;
         
-        // Prevent default behavior for these keys
-        if (e.key === 'Enter' || e.key === 'Escape') {
-            e.preventDefault();
-        }
-        
         if (e.key === 'Enter' && elements.nextBtn && !elements.nextBtn.disabled) {
+            e.preventDefault();
             goToNextQuestion();
         } else if (e.key === 'Escape') {
+            e.preventDefault();
             goToPreviousQuestion();
         }
     }
